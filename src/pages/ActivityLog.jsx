@@ -8,7 +8,7 @@ import ConfidenceBadge from '../components/ConfidenceBadge'
 import LogReasoningModal from '../components/LogReasoningModal'
 import IncidentCardModal from '../components/IncidentCardModal'
 import { activityLog as baseLog } from '../data/alerts'
-
+import FailureAnalysisModal from '../components/FailureAnalysisModal'
 function exportCSV(rows) {
   const headers = ['Timestamp', 'Device', 'Alert ID', 'AI Action', 'Confidence', 'Human Decision', 'Decision By', 'Outcome', 'Override Reason', 'Override Notes']
   const lines = [
@@ -52,7 +52,7 @@ export default function ActivityLog({ alerts }) {
   // Modal state for reasoning drawer and incident card
   const [selectedLog, setSelectedLog] = useState(null)
   const [showIncident, setShowIncident] = useState(null)
-
+  const [selectedIncident, setSelectedIncident] = useState(null)
   // Merge base log with any new decisions from alerts state
   const allLog = useMemo(() => {
     const fromAlerts = alerts
@@ -78,7 +78,9 @@ export default function ActivityLog({ alerts }) {
     const existing = baseLog.filter(b => !fromAlerts.find(f => f.alertId === b.alertId))
     return [...fromAlerts, ...existing].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
   }, [alerts])
-
+  const failedIncidents = baseLog.filter(
+    log => log.isIncident
+  )
   const filtered = useMemo(() => {
     return allLog.filter(row => {
       const q = search.toLowerCase()
@@ -113,7 +115,22 @@ export default function ActivityLog({ alerts }) {
       navigate(`/detail/${alertId}`)
     }
   }
+  const approvedCount =
+    allLog.filter(
+      x =>
+        x.humanDecision === 'APPROVED' ||
+        x.humanDecision === 'AUTO-APPROVED'
+    ).length
 
+  const overriddenCount =
+    allLog.filter(
+      x => x.humanDecision === 'OVERRIDDEN'
+    ).length
+
+  const escalatedCount =
+    allLog.filter(
+      x => x.humanDecision === 'ESCALATED'
+    ).length
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-5 animate-fade-in">
       {/* Header */}
@@ -134,7 +151,34 @@ export default function ActivityLog({ alerts }) {
           Download as CSV
         </button>
       </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="card text-center">
+          <p className="text-green-600 font-bold">
+            {approvedCount}
+          </p>
+          <p className="text-xs text-gray-500">
+            Approved
+          </p>
+        </div>
 
+        <div className="card text-center">
+          <p className="text-amber-600 font-bold">
+            {overriddenCount}
+          </p>
+          <p className="text-xs text-gray-500">
+            Overridden
+          </p>
+        </div>
+
+        <div className="card text-center">
+          <p className="text-purple-600 font-bold">
+            {escalatedCount}
+          </p>
+          <p className="text-xs text-gray-500">
+            Escalated
+          </p>
+        </div>
+      </div>
       {/* Search + Filters */}
       <div className="card">
         <div className="flex flex-wrap gap-3">
@@ -181,7 +225,53 @@ export default function ActivityLog({ alerts }) {
           </p>
         )}
       </div>
+      <div className="space-y-3">
+        {failedIncidents.map(log => (
+          <div
+            key={log.id}
+            className="
+              bg-red-50
+              border
+              border-red-200
+              rounded-xl
+              p-4
+            "
+          >
+            <div className="flex justify-between items-center">
 
+              <div>
+                <p className="font-semibold text-red-800">
+                  {log.device}
+                </p>
+
+                <p className="text-sm text-red-600 mt-1">
+                  {log.outcome}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setSelectedIncident(log)}
+                className="
+                  px-4 py-2
+                  rounded-lg
+
+                  bg-white
+
+                  border
+
+                  text-sm
+                  font-semibold
+
+                  hover:bg-red-50
+                "
+              >
+                📖 What AI Learned
+              </button>
+
+            </div>
+          </div>
+        ))}
+      </div>
       {/* Table */}
       {filtered.length === 0 ? (
         /* Empty state */
@@ -285,7 +375,13 @@ export default function ActivityLog({ alerts }) {
       {selectedLog && (
         <LogReasoningModal log={selectedLog} onClose={handleModalClose} />
       )}
-
+      {selectedIncident && (
+        <FailureAnalysisModal
+          incident={selectedIncident.incident}
+          device={selectedIncident.device}
+          onClose={() => setSelectedIncident(null)}
+        />
+      )}
       {/* Incident Card Modal — shown for isIncident rows */}
       {showIncident && (
         <IncidentCardModal log={showIncident} onClose={() => setShowIncident(null)} />

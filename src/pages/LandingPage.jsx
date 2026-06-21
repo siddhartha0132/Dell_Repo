@@ -94,7 +94,28 @@ function Terminal() {
   ]
   const [visible, setVisible] = useState(0)
   useEffect(() => {
-    lines.forEach((l, i) => setTimeout(() => setVisible(i + 1), l.t + 600))
+    let timers = []
+
+    const runAnimation = () => {
+      setVisible(0)
+
+      lines.forEach((l, i) => {
+        timers.push(
+          setTimeout(() => {
+            setVisible(i + 1)
+          }, l.t)
+        )
+      })
+    }
+
+    runAnimation()
+
+    const loop = setInterval(runAnimation, 7000)
+
+    return () => {
+      timers.forEach(clearTimeout)
+      clearInterval(loop)
+    }
   }, [])
   return (
     <div className="relative bg-[#0a0a0f] border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-blue-500/10">

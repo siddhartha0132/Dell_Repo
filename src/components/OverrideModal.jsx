@@ -40,17 +40,24 @@ export default function OverrideModal({ alert, onConfirm, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true" aria-label="Override AI recommendation">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-slide-in">
+    <div className="
+      fixed inset-0
+      bg-black/20
+      backdrop-blur-lg
+      flex items-center justify-center
+      z-50
+    ">
+        <div className="relative overflow-hidden w-full max-w-md rounded-3xl bg-white/70 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.2)] animate-glass-pop">
+        <div className=" absolute -top-16 -right-16 w-40 h-40 rounded-full bg-dell-blue/15 blur-3xl pointer-events-none"/>
+
+        <div className="absolute-bottom-10-left-10 w-3 h-32 rounded-full bg-blue-200/20 blur-3xl pointer-events-none"/>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
             <h2 className="text-base font-bold text-dell-navy">Override AI Recommendation</h2>
             <p className="text-xs text-gray-500 mt-0.5">{alert?.deviceName} — {alert?.alertType}</p>
           </div>
-          <button onClick={onClose} aria-label="Close override modal" className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
+          <button onClick={onClose} aria-label="Close override modal" className=" w-8 h-8 rounded-full bg-white/50 backdrop-blur-md hover:bg-white transition-allduration-200 flex items-center justify-center"></button>
         </div>
 
         {submitted ? (
@@ -99,12 +106,12 @@ export default function OverrideModal({ alert, onConfirm, onClose }) {
 
             {/* Actions */}
             <div className="flex gap-3 pt-1">
-              <button onClick={onClose} className="btn-secondary flex-1">Cancel</button>
+              <button onClick={onClose} className="btn-secondary flex-1 hover:scale-105 transition-all">Cancel</button>
               <button
                 id="btn-confirm-override"
                 onClick={handleConfirm}
                 disabled={!reason}
-                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
+                className="flex-1 bg-amber-600 hover:bg-amber-700 hover:scale-105 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
               >
                 Confirm Override
               </button>

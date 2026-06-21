@@ -6,7 +6,7 @@ import ConfidenceBadge from '../components/ConfidenceBadge'
 import OverrideModal from '../components/OverrideModal'
 import Toast from '../components/Toast'
 import { alerts as initialAlerts, activityLog } from '../data/alerts'
-
+import { useEffect } from 'react'
 const severityOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 }
 const confidenceOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 }
 
@@ -31,13 +31,19 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
   const navigate = useNavigate()
   const [overrideTarget, setOverrideTarget] = useState(null)
   const [executingId, setExecutingId] = useState(null)
-
+  const [seconds, setSeconds] = useState(0)
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('ALL')
   const [activeSeverity, setActiveSeverity] = useState('ALL')
   const [isSimulating, setIsSimulating] = useState(false)
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setSeconds(prev => prev + 1)
+  }, 1000)
 
+  return () => clearInterval(interval)
+}, [])
   const sorted = sortAlerts(alerts)
 
   const filteredAlerts = useMemo(() => {
@@ -156,7 +162,7 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
           </div>
           <div id="stat-devices" className="card flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-dell-lightblue flex items-center justify-center flex-shrink-0">
-              <Monitor className="w-6 h-6 text-dell-blue" />
+              <Monitor className="w-6 h-6 text-dell-blue animate-pulse" />
             </div>
             <div>
               <p className="label">Devices Monitored</p>
@@ -225,7 +231,43 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
             ))}
           </div>
         </div>
+        <div
+          className="
+            mb-5
+          ]
+            inline-flex
+            items-center
+            gap-3
+            px-4
+            py-2
 
+            rounded-full
+
+            bg-green-50
+
+            border
+            border-green-200
+          "
+        >
+          <span
+            className="
+              w-2.5
+              h-2.5
+
+              bg-green-500
+
+              rounded-full
+
+              animate-pulse
+            "
+          />
+
+          <div>
+            <p className="text-xs text-green-600">
+              Monitoring 2,400 Devices • {alerts.length} Recommendations Generated
+            </p>
+          </div>
+        </div>
         {/* Recommendation cards */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -258,10 +300,11 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
                 </button>
               </div>
             )}
-            {filteredAlerts.map(alert => (
+            {filteredAlerts.map((alert, index) => (
               <AlertCard
                 key={alert.id}
                 alert={alert}
+                index={index}
                 isExecuting={executingId === alert.id}
                 isAnyExecuting={executingId !== null}
                 onApprove={() => handleApprove(alert.id)}
@@ -338,15 +381,37 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
 }
 
 // AlertCard — individual recommendation card
-function AlertCard({ alert, onApprove, onOverride, onViewDetails, isExecuting, isAnyExecuting }) {
+function AlertCard({ alert, index,onApprove, onOverride, onViewDetails, isExecuting, isAnyExecuting }) {
   const isActed = alert.status !== 'PENDING'
 
   return (
     <div
       id={`alert-card-${alert.id}`}
-      className={`card-hover border ${
-        isActed ? 'opacity-60 bg-gray-50' : ''
-      } ${alert.severity === 'CRITICAL' && !isActed ? 'border-l-4 border-l-confidence-low' : ''}`}
+      className={`
+        card-hover
+        border
+        animate-card-reveal
+
+        ${
+          isActed
+            ? 'opacity-60 bg-gray-50'
+            : ''
+        }
+
+        ${
+          alert.severity === 'CRITICAL' && !isActed
+            ? `
+                border-l-4
+                border-l-confidence-low
+
+                shadow-[0_0_20px_rgba(239,68,68,0.15)]
+              `
+            : ''
+        }
+      `}
+      style={{
+        animationDelay: `${index * 350}ms`
+      }}
     >
       <div className="flex items-start gap-4">
         {/* Category icon */}
@@ -372,7 +437,7 @@ function AlertCard({ alert, onApprove, onOverride, onViewDetails, isExecuting, i
               </div>
               <p className="font-semibold text-gray-800 text-sm">{alert.alertType}</p>
             </div>
-            <ConfidenceBadge level={alert.confidenceLevel} score={alert.confidenceScore} />
+            <ConfidenceBadge level={alert.confidenceLevel} score={alert.confidenceScore} driver={alert.confidenceDriver}/>
           </div>
 
           {/* One-line reason — leads with the fact, not "The AI has determined..." */}

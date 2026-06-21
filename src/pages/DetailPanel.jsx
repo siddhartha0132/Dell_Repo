@@ -12,7 +12,7 @@ import ActionButtons from '../components/ActionButtons'
 import OverrideModal from '../components/OverrideModal'
 import AlternativesModal from '../components/AlternativesModal'
 import { activityLog } from '../data/alerts'
-
+import EvidenceTimeline from '../components/EvidenceTimeline'
 // Context Tuner toggle definitions — each adjusts confidence by ±10%
 const CONTEXT_TOGGLES = [
   {
@@ -49,11 +49,21 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const alert = alerts.find(a => a.id === id)
+  const trustScore = (() => {
+  const score =
+    alert.confidenceLevel === 'HIGH'
+      ? 9.2
+      : alert.confidenceLevel === 'MEDIUM'
+      ? 7.6
+      : 5.1
+
+  return score.toFixed(1)
+})()
   const [showOverride, setShowOverride] = useState(false)
   const [showAlt, setShowAlt] = useState(false)
   const [showAskWhy, setShowAskWhy] = useState(false)
   const [isExecuting, setIsExecuting] = useState(false)
-
+  const [thinking, setThinking] = useState(false)
   // ── Context Tuner State ──
   const [tunerOpen, setTunerOpen] = useState(false)
   const [toggles, setToggles] = useState(() =>
@@ -210,6 +220,12 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
               <span className="text-xs text-gray-400">{alert.deviceModel}</span>
             </div>
             <h1 className="text-xl font-bold text-dell-navy">{alert.alertType}</h1>
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-200">
+              <span>🛡️</span>
+              <span className="text-sm font-semibold text-green-700">
+                Trust Score: {trustScore}/10
+              </span>
+            </div>
             <div className="flex items-center gap-3 mt-2 text-xs text-gray-400 flex-wrap">
               <span>🕐 {new Date(alert.timestamp).toLocaleString()}</span>
               <span>📍 {alert.department}</span>
@@ -247,7 +263,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
           )}
         </div>
         <div className="flex flex-col items-center gap-4 py-4">
-          <ConfidenceBadge level={adjustedLevel} score={adjustedScore} size="lg" />
+          <ConfidenceBadge level={adjustedLevel} score={adjustedScore}   driver={alert.confidenceDriver} size="lg" />
 
           {/* Animated confidence meter */}
           <div className="w-full max-w-md">
@@ -271,9 +287,10 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
               )}
               {/* Bar */}
               <div
-                className={`h-full ${cc.bar} rounded-full transition-all duration-700 ease-out shadow-sm`}
+                className={`h-full ${cc.bar} rounded-full transition-all duration-700 ease-out shadow-sm relative overflow-hidden`}
                 style={{ width: `${barWidth}%` }}
               />
+              <div className="confidence-shine" />
             </div>
             {isTuned && (
               <p className="text-[11px] text-gray-400 mt-1.5 text-center">
@@ -409,7 +426,10 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
           </div>
         )}
       </div>
-
+      {/* ─── Evidence Timeline ─── */}
+      <EvidenceTimeline
+        events={alert.timelineEvents || []}
+      />
       {/* ─── 3. REASONING SECTION (Transparency Element #1) ─── */}
       <ReasoningPanel steps={alert.reasoningSteps} />
 
@@ -443,10 +463,28 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
           isExecuting={isExecuting}
           onApprove={handleApprove}
           onOverride={() => setShowOverride(true)}
-          onAskWhy={() => setShowAskWhy(!showAskWhy)}
+          onAskWhy={() => {
+            if (!showAskWhy) {
+              setThinking(true)
+
+              setTimeout(() => {
+                setThinking(false)
+                setShowAskWhy(true)
+              }, 1000)
+            } else {
+              setShowAskWhy(false)
+            }
+          }}
           onAlternatives={() => setShowAlt(true)}
           onEscalate={handleEscalate}
         />
+        {thinking && (
+          <div className="mt-4 bg-gray-50 rounded-xl p-4">
+            <div className="animate-pulse">
+              🧠 GuardianAI reviewing evidence...
+            </div>
+          </div>
+        )}
         {showAskWhy && (
           <div className="mt-4 bg-dell-lightblue border border-dell-blue/20 rounded-xl px-5 py-4 animate-fade-in">
             <p className="text-sm font-bold text-dell-navy mb-2">❓ Why this recommendation?</p>
