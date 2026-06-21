@@ -142,7 +142,7 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
       <div className="flex-1 min-w-0 space-y-6">
         {/* Summary strip */}
         <div className="grid grid-cols-3 gap-4">
-          <div id="stat-active-alerts" className="card flex items-center gap-4">
+          <div id="stat-active-alerts" className="bg-gradient-to-br from-white to-pink-50/40 rounded-xl shadow-sm border border-pink-100/60 hover:to-pink-100/50 hover:border-pink-300 hover:shadow-md p-6 flex items-center gap-4 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 rounded-xl bg-confidence-low-bg flex items-center justify-center flex-shrink-0">
               <AlertTriangle className="w-6 h-6 text-confidence-low" />
             </div>
@@ -151,7 +151,7 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
               <p className="text-3xl font-bold text-dell-navy mt-0.5">{stats.active}</p>
             </div>
           </div>
-          <div id="stat-pending-actions" className="card flex items-center gap-4">
+          <div id="stat-pending-actions" className="bg-gradient-to-br from-white to-orange-50/45 rounded-xl shadow-sm border border-orange-100/60 hover:to-orange-100/60 hover:border-orange-300 hover:shadow-md p-6 flex items-center gap-4 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
               <Clock className="w-6 h-6 text-amber-600" />
             </div>
@@ -160,7 +160,7 @@ export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }
               <p className="text-3xl font-bold text-dell-navy mt-0.5">{stats.pending}</p>
             </div>
           </div>
-          <div id="stat-devices" className="card flex items-center gap-4">
+          <div id="stat-devices" className="bg-gradient-to-br from-white to-blue-50/30 rounded-xl shadow-sm border border-blue-100/50 hover:to-blue-100/40 hover:border-blue-300 hover:shadow-md p-6 flex items-center gap-4 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 rounded-xl bg-dell-lightblue flex items-center justify-center flex-shrink-0">
               <Monitor className="w-6 h-6 text-dell-blue animate-pulse" />
             </div>
