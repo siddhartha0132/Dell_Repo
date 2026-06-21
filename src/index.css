@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #F0F4F8;
+    color: #1a2533;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+  .card-hover {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:shadow-md hover:border-dell-blue/20 cursor-pointer;
+  }
+  .badge {
+    @apply rounded-full px-3 py-1 text-xs font-semibold inline-flex items-center gap-1;
+  }
+  .badge-high {
+    @apply badge bg-confidence-high-bg text-confidence-high border border-confidence-high/20;
+  }
+  .badge-medium {
+    @apply badge bg-confidence-medium-bg text-confidence-medium border border-confidence-medium/20;
+  }
+  .badge-low {
+    @apply badge bg-confidence-low-bg text-confidence-low border border-confidence-low/20;
+  }
+  .label {
+    @apply text-xs font-semibold uppercase tracking-widest text-gray-400;
+  }
+  .btn-primary {
+    @apply bg-dell-blue text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all duration-150 shadow-sm hover:shadow-md;
+  }
+  .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-50 active:scale-95 transition-all duration-150;
+  }
+  .btn-danger {
+    @apply bg-white text-confidence-low border border-confidence-low/40 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-confidence-low-bg active:scale-95 transition-all duration-150;
+  }
+  .btn-outline {
+    @apply bg-white text-dell-navy border border-dell-navy/30 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-dell-lightblue active:scale-95 transition-all duration-150;
+  }
+  .btn-link {
+    @apply text-dell-blue font-semibold text-sm hover:underline active:scale-95 transition-all duration-150 px-2 py-2;
+  }
+  .nav-link {
+    @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150;
+  }
+  .sidebar-active {
+    @apply bg-dell-lightblue text-dell-blue;
+  }
+  .sidebar-inactive {
+    @apply text-gray-500 hover:text-gray-800 hover:bg-gray-50;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Confidence bar animation */
+.confidence-bar {
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Pulse for critical badge */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(198, 40, 40, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0); }
+}
+.pulse-critical {
+  animation: pulse-ring 2s infinite;
+}
+
+/* Toast animation */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-10px) scale(0.95); }
+}
+.toast-enter { animation: toastIn 0.3s ease-out forwards; }
+.toast-exit { animation: toastOut 0.3s ease-in forwards; }
