@@ -1,8 +1,9 @@
 // App.jsx — Root: Router + global state
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import Navbar from './components/Navbar'
 import Toast from './components/Toast'
+import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import DetailPanel from './pages/DetailPanel'
 import ActivityLog from './pages/ActivityLog'
@@ -14,6 +15,7 @@ export default function App() {
   const [alerts, setAlerts] = useState(initialAlerts)
   const [autonomyMode, setAutonomyMode] = useState('always-ask')
   const [toast, setToast] = useState(null)
+  const location = useLocation()
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type, key: Date.now() })
@@ -21,14 +23,18 @@ export default function App() {
 
   const pendingCount = alerts.filter(a => a.status === 'PENDING').length
 
+  // Hide navbar on landing page — it has its own hero header
+  const showNavbar = location.pathname !== '/'
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      <Navbar autonomyMode={autonomyMode} alertCount={pendingCount} />
+      {showNavbar && <Navbar autonomyMode={autonomyMode} alertCount={pendingCount} />}
 
-      <main className="pb-16">
+      <main className={showNavbar ? 'pb-16' : ''}>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route
-            path="/"
+            path="/dashboard"
             element={<Dashboard alerts={alerts} setAlerts={setAlerts} showToast={showToast} />}
           />
           <Route

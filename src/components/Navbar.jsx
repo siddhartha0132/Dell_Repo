@@ -12,7 +12,7 @@ export default function Navbar({ autonomyMode, alertCount = 0 }) {
   }
   const mode = autonomyLabels[autonomyMode] || autonomyLabels['always-ask']
   const navItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/log', label: 'Activity Log', icon: Activity },
     { to: '/settings', label: 'Settings', icon: Settings },
     { to: '/summary', label: 'Summary', icon: FileText },

@@ -31,7 +31,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
       <div className="max-w-3xl mx-auto p-6">
         <div className="card text-center py-16">
           <p className="text-gray-400 text-lg">Alert not found.</p>
-          <button onClick={() => navigate('/')} className="btn-primary mt-4">← Back to Dashboard</button>
+          <button onClick={() => navigate('/dashboard')} className="btn-primary mt-4">← Back to Dashboard</button>
         </div>
       </div>
     )
@@ -66,7 +66,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
       <div className="flex items-center gap-3 mb-2">
         <button
           id="btn-back-dashboard"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-dell-blue transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
