@@ -1,6 +1,6 @@
 // App.jsx — Root: Router + global state
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Toast from './components/Toast'
 import LandingPage from './pages/LandingPage'
@@ -10,6 +10,31 @@ import ActivityLog from './pages/ActivityLog'
 import Settings from './pages/Settings'
 import StakeholderSummary from './pages/StakeholderSummary'
 import { alerts as initialAlerts } from './data/alerts'
+
+function ScrollToHashElement() {
+  const { hash } = useLocation()
+
+  useEffect(() => {
+    if (hash) {
+      const t = setTimeout(() => {
+        const id = hash.replace('#', '')
+        const element = document.getElementById(id)
+        if (element) {
+          const offset = id === 'transparency' ? 80 : 72
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+          const offsetPosition = elementPosition - offset
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
+      return () => clearTimeout(t)
+    }
+  }, [hash])
+
+  return null
+}
 
 export default function App() {
   const [alerts, setAlerts] = useState(initialAlerts)
@@ -28,6 +53,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen font-sans">
+      <ScrollToHashElement />
       {showNavbar && <Navbar autonomyMode={autonomyMode} alertCount={pendingCount} />}
 
       <main className={showNavbar ? 'pb-16' : ''}>

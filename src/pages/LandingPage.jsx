@@ -27,9 +27,8 @@ export default function LandingPage() {
     const element = document.getElementById(id)
     if (element) {
       const offset = id === 'transparency' ? 80 : 72
-      const bodyRect = document.body.getBoundingClientRect().top
-      const elementRect = element.getBoundingClientRect().top
-      const elementPosition = elementRect - bodyRect
+      const scrollY = window.scrollY !== undefined ? window.scrollY : window.pageYOffset
+      const elementPosition = element.getBoundingClientRect().top + scrollY
       const offsetPosition = elementPosition - offset
 
       window.scrollTo({
