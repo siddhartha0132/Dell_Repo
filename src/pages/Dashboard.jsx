@@ -30,6 +30,7 @@ const categoryColors = {
 export default function Dashboard({ alerts, setAlerts, showToast }) {
   const navigate = useNavigate()
   const [overrideTarget, setOverrideTarget] = useState(null)
+  const [executingId, setExecutingId] = useState(null)
   const sorted = sortAlerts(alerts)
 
   const stats = {
@@ -39,8 +40,12 @@ export default function Dashboard({ alerts, setAlerts, showToast }) {
   }
 
   const handleApprove = (id) => {
-    setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'APPROVED' } : a))
-    showToast('✅ Action approved and logged to Activity Log.', 'success')
+    setExecutingId(id)
+    setTimeout(() => {
+      setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'APPROVED' } : a))
+      showToast('✅ Action approved and logged to Activity Log.', 'success')
+      setExecutingId(null)
+    }, 1000)
   }
 
   const handleOverrideConfirm = ({ reason, notes }) => {
@@ -95,10 +100,23 @@ export default function Dashboard({ alerts, setAlerts, showToast }) {
             <span className="text-xs text-gray-400">Sorted by priority — critical first</span>
           </div>
           <div className="space-y-3">
+            {stats.pending === 0 && (
+              <div className="card bg-green-50/20 border border-green-200/40 p-8 text-center flex flex-col items-center justify-center rounded-xl shadow-sm animate-fade-in mb-4">
+                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                  <CheckCircle className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="font-bold text-dell-navy text-lg mb-1">Your Fleet is Secure</h3>
+                <p className="text-sm text-gray-500 max-w-md">
+                  All automated AI recommendations have been successfully reviewed and resolved. No pending actions require attention at this time.
+                </p>
+              </div>
+            )}
             {sorted.map(alert => (
               <AlertCard
                 key={alert.id}
                 alert={alert}
+                isExecuting={executingId === alert.id}
+                isAnyExecuting={executingId !== null}
                 onApprove={() => handleApprove(alert.id)}
                 onOverride={() => setOverrideTarget(alert)}
                 onViewDetails={() => navigate(`/detail/${alert.id}`)}
@@ -173,7 +191,7 @@ export default function Dashboard({ alerts, setAlerts, showToast }) {
 }
 
 // AlertCard — individual recommendation card
-function AlertCard({ alert, onApprove, onOverride, onViewDetails }) {
+function AlertCard({ alert, onApprove, onOverride, onViewDetails, isExecuting, isAnyExecuting }) {
   const isActed = alert.status !== 'PENDING'
 
   return (
@@ -222,21 +240,33 @@ function AlertCard({ alert, onApprove, onOverride, onViewDetails }) {
                 <button
                   id={`card-approve-${alert.id}`}
                   onClick={e => { e.stopPropagation(); onApprove() }}
-                  className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1"
+                  disabled={isAnyExecuting}
+                  className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-85 disabled:cursor-wait"
                 >
-                  ✅ Approve
+                  {isExecuting ? (
+                    <>
+                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <span>✅</span> Approve
+                    </>
+                  )}
                 </button>
                 <button
                   id={`card-override-${alert.id}`}
                   onClick={e => { e.stopPropagation(); onOverride() }}
-                  className="btn-secondary text-xs px-3 py-1.5"
+                  disabled={isAnyExecuting}
+                  className="btn-secondary text-xs px-3 py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ↩ Override
                 </button>
                 <button
                   id={`card-details-${alert.id}`}
                   onClick={e => { e.stopPropagation(); onViewDetails() }}
-                  className="btn-link text-xs flex items-center gap-0.5"
+                  disabled={isAnyExecuting}
+                  className="btn-link text-xs flex items-center gap-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   View Details <ChevronRight className="w-3 h-3" />
                 </button>
@@ -244,9 +274,13 @@ function AlertCard({ alert, onApprove, onOverride, onViewDetails }) {
             ) : (
               <div className="flex items-center gap-2">
                 <span className={`badge text-[11px] ${
-                  alert.status === 'APPROVED' ? 'badge-high' : 'badge-medium'
+                  alert.status === 'APPROVED' ? 'badge-high'
+                  : alert.status === 'OVERRIDDEN' ? 'badge-medium'
+                  : 'bg-purple-100 text-purple-700 border border-purple-200'
                 }`}>
-                  {alert.status === 'APPROVED' ? '✅ Approved' : '↩ Overridden'}
+                  {alert.status === 'APPROVED' ? '✅ Approved'
+                   : alert.status === 'OVERRIDDEN' ? '↩ Overridden'
+                   : '⬆ Escalated'}
                 </span>
                 <button
                   onClick={onViewDetails}

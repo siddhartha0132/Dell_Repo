@@ -57,7 +57,7 @@ export default function ActivityLog({ alerts }) {
         humanDecision: a.status,
         overrideReason: a.overrideReason,
         decisionBy: a.decisionBy || 'Alex Chen',
-        outcome: a.outcome || (a.status === 'APPROVED' ? 'Pending execution' : 'Overridden by admin'),
+        outcome: a.outcome || (a.status === 'APPROVED' ? 'Pending execution' : a.status === 'ESCALATED' ? 'Escalated to Security Team' : 'Overridden by admin'),
         category: a.category,
       }))
     const existing = baseLog.filter(b => !fromAlerts.find(f => f.alertId === b.alertId))

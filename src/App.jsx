@@ -21,7 +21,7 @@ export default function App() {
   const pendingCount = alerts.filter(a => a.status === 'PENDING').length
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen font-sans">
       <Navbar autonomyMode={autonomyMode} alertCount={pendingCount} />
 
       <main className="pb-16">

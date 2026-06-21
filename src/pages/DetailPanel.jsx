@@ -19,6 +19,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
   const [showOverride, setShowOverride] = useState(false)
   const [showAlt, setShowAlt] = useState(false)
   const [showAskWhy, setShowAskWhy] = useState(false)
+  const [isExecuting, setIsExecuting] = useState(false)
 
   // Animate confidence bar on mount
   useEffect(() => {
@@ -45,8 +46,12 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
   const cc = confColors[alert.confidenceLevel]
 
   const handleApprove = () => {
-    setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'APPROVED' } : a))
-    showToast('✅ Action approved and logged to Activity Log.', 'success')
+    setIsExecuting(true)
+    setTimeout(() => {
+      setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'APPROVED' } : a))
+      showToast('✅ Action approved and logged to Activity Log.', 'success')
+      setIsExecuting(false)
+    }, 1000)
   }
   const handleOverrideConfirm = ({ reason, notes }) => {
     setAlerts(prev => prev.map(a =>
@@ -56,7 +61,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
     showToast('↩ Override logged. GuardianAI will use your feedback to improve.', 'warning')
   }
   const handleEscalate = () => {
-    setAlerts(prev => prev.map(a => a.id === id ? { ...a, escalated: true } : a))
+    setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'ESCALATED', escalated: true } : a))
     showToast('⬆ Escalated to Security team. You\'ll receive a response within 2 hours.', 'info')
   }
 
@@ -97,8 +102,14 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
             </div>
           </div>
           {alert.status !== 'PENDING' && (
-            <span className={`badge text-sm ${alert.status === 'APPROVED' ? 'badge-high' : 'badge-medium'}`}>
-              {alert.status === 'APPROVED' ? '✅ Approved' : '↩ Overridden'}
+            <span className={`badge text-sm ${
+              alert.status === 'APPROVED' ? 'badge-high'
+              : alert.status === 'OVERRIDDEN' ? 'badge-medium'
+              : 'bg-purple-100 text-purple-700 border border-purple-200'
+            }`}>
+              {alert.status === 'APPROVED' ? '✅ Approved'
+               : alert.status === 'OVERRIDDEN' ? '↩ Overridden'
+               : '⬆ Escalated'}
             </span>
           )}
         </div>
@@ -174,6 +185,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
         <ActionButtons
           alertId={alert.id}
           status={alert.status}
+          isExecuting={isExecuting}
           onApprove={handleApprove}
           onOverride={() => setShowOverride(true)}
           onAskWhy={() => setShowAskWhy(!showAskWhy)}
