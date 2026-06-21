@@ -46,7 +46,7 @@ export default function LandingPage() {
             {[
               { label: 'Problem', href: '#problem' },
               { label: 'Solution', href: '#solution' },
-              { label: 'Transparency', href: '#solution' },
+              { label: 'Transparency', href: '#transparency' },
               { label: 'Screens', href: '#screens' },
             ].map(item => (
               <a
@@ -179,7 +179,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── OUR SOLUTION: GuardianAI ─── */}
-      <section className="bg-white">
+      <section id="solution" className="bg-white">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="label text-dell-blue mb-3">Our Solution</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-dell-navy leading-tight max-w-3xl">
@@ -192,7 +192,7 @@ export default function LandingPage() {
           </p>
 
           {/* 5 Transparency Elements */}
-          <div className="mt-12">
+          <div id="transparency" className="mt-12">
             <p className="label text-gray-400 mb-5">The 5 Mandatory Transparency Elements</p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {TRANSPARENCY.map(t => (
@@ -211,7 +211,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── ALL SCREENS ─── */}
-      <section className="bg-gray-50 border-t border-gray-200">
+      <section id="screens" className="bg-gray-50 border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="label text-dell-blue mb-3">Explore the Prototype</p>
           <h2 className="text-3xl font-extrabold text-dell-navy mb-8">All Screens</h2>
