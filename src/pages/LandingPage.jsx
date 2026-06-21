@@ -99,7 +99,7 @@ export default function LandingPage() {
             </div>
             <div>
               <span className="text-white font-bold text-xl tracking-tight">Guardian<span className="text-dell-blue">AI</span></span>
-              <span className="block text-white/40 text-[10px] uppercase tracking-[0.25em] font-semibold">Dell Hackathon 2024</span>
+              <span className="block text-white/40 text-[10px] uppercase tracking-[0.25em] font-semibold">Dell Hackathon 2026</span>
             </div>
           </div>
 
@@ -247,7 +247,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-dell-blue" />
             <span className="text-sm font-semibold text-white/70">GuardianAI</span>
-            <span className="text-xs">· Dell Hackathon 2024</span>
+            <span className="text-xs">· Dell Hackathon 2026</span>
           </div>
           <p className="text-xs text-center">
             "AI that explains itself — so you can trust it." · Built with React + Tailwind CSS · No backend required
