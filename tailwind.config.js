@@ -29,8 +29,8 @@ export default {
       },
       keyframes: {
         slideIn: {
-          '0%': { transform: 'translateX(-20px)', opacity: '0' },
-          '100%': { transform: 'translateX(0)', opacity: '1' },
+          '0%': { transform: 'scale(0.95) translateY(10px)', opacity: '0' },
+          '100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
         },
         fadeIn: {
           '0%': { opacity: '0', transform: 'translateY(8px)' },

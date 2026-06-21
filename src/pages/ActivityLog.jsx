@@ -1,8 +1,12 @@
 // ActivityLog.jsx — Screen 3: Audit Trail
+// Feature: Clickable Activity Log Reasoning Drawer/Modal
+// Feature: AI Failure Incident Card (LOG006 isIncident rows)
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Download, Filter, ChevronRight, Database } from 'lucide-react'
+import { Search, Download, Filter, ChevronRight, Database, Info, AlertOctagon } from 'lucide-react'
 import ConfidenceBadge from '../components/ConfidenceBadge'
+import LogReasoningModal from '../components/LogReasoningModal'
+import IncidentCardModal from '../components/IncidentCardModal'
 import { activityLog as baseLog } from '../data/alerts'
 
 function exportCSV(rows) {
@@ -43,6 +47,10 @@ export default function ActivityLog({ alerts }) {
   const [filterDec, setFilterDec] = useState('ALL')
   const [filterDate, setFilterDate] = useState('ALL')
 
+  // Modal state for reasoning drawer and incident card
+  const [selectedLog, setSelectedLog] = useState(null)
+  const [showIncident, setShowIncident] = useState(null)
+
   // Merge base log with any new decisions from alerts state
   const allLog = useMemo(() => {
     const fromAlerts = alerts
@@ -59,6 +67,10 @@ export default function ActivityLog({ alerts }) {
         decisionBy: a.decisionBy || 'Alex Chen',
         outcome: a.outcome || (a.status === 'APPROVED' ? 'Pending execution' : a.status === 'ESCALATED' ? 'Escalated to Security Team' : 'Overridden by admin'),
         category: a.category,
+        // Carry over reasoning data from alert if available
+        reasoningSteps: a.reasoningSteps,
+        dataSource: a.dataSource,
+        limitations: a.limitations,
       }))
     const existing = baseLog.filter(b => !fromAlerts.find(f => f.alertId === b.alertId))
     return [...fromAlerts, ...existing].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
@@ -82,6 +94,23 @@ export default function ActivityLog({ alerts }) {
     })
   }, [allLog, search, filterConf, filterDec, filterDate])
 
+  const handleRowClick = (row) => {
+    if (row.isIncident) {
+      // Show the incident post-mortem card
+      setShowIncident(row)
+    } else {
+      // Show reasoning modal for ALL rows
+      setSelectedLog(row)
+    }
+  }
+
+  const handleModalClose = (action, alertId) => {
+    setSelectedLog(null)
+    if (action === 'navigate' && alertId) {
+      navigate(`/detail/${alertId}`)
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-5 animate-fade-in">
       {/* Header */}
@@ -91,7 +120,7 @@ export default function ActivityLog({ alerts }) {
             <Database className="w-5 h-5 text-dell-blue" />
             Activity Log & Audit Trail
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Every AI action and human decision, permanently recorded.</p>
+          <p className="text-sm text-gray-500 mt-0.5">Every AI action and human decision, permanently recorded. Click any row for full reasoning.</p>
         </div>
         <button
           id="btn-export-csv"
@@ -179,20 +208,47 @@ export default function ActivityLog({ alerts }) {
               <tbody className="divide-y divide-gray-50">
                 {filtered.map(row => {
                   const dec = DECISION_LABELS[row.humanDecision] || { label: row.humanDecision, class: 'badge bg-gray-100 text-gray-600' }
+                  const isIncident = row.isIncident
+                  const hasReasoning = row.reasoningSteps && row.reasoningSteps.length > 0
                   return (
                     <tr
                       key={row.id}
                       id={`log-row-${row.id}`}
-                      onClick={() => row.alertId && navigate(`/detail/${row.alertId}`)}
-                      className={`transition-colors group ${row.alertId ? 'hover:bg-dell-lightblue/30 cursor-pointer' : 'hover:bg-gray-50'}`}
+                      onClick={() => handleRowClick(row)}
+                      className={`transition-colors group cursor-pointer ${
+                        isIncident
+                          ? 'bg-red-50/40 hover:bg-red-50/70 border-l-2 border-l-confidence-low'
+                          : 'hover:bg-dell-lightblue/30'
+                      }`}
+                      title={isIncident ? 'Click to view AI Incident Post-Mortem' : hasReasoning ? 'Click to view AI reasoning details' : 'Click for details'}
                     >
                       <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap text-xs">
                         {new Date(row.timestamp).toLocaleString()}
                       </td>
-                      <td className="px-4 py-3.5 font-semibold text-dell-navy whitespace-nowrap">{row.device}</td>
+                      <td className="px-4 py-3.5 font-semibold text-dell-navy whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {isIncident && (
+                            <span className="relative flex h-2.5 w-2.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-confidence-low opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-confidence-low" />
+                            </span>
+                          )}
+                          {row.device}
+                        </div>
+                      </td>
                       <td className="px-4 py-3.5 text-gray-700 max-w-xs">
-                        <p className="truncate">{row.aiAction}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{row.decisionBy}</p>
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <p className={`truncate ${isIncident ? 'text-confidence-low font-semibold' : ''}`}>{row.aiAction}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{row.decisionBy}</p>
+                          </div>
+                          {hasReasoning && !isIncident && (
+                            <Info className="w-3.5 h-3.5 text-dell-blue flex-shrink-0 mt-0.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                          )}
+                          {isIncident && (
+                            <AlertOctagon className="w-4 h-4 text-confidence-low flex-shrink-0 mt-0.5" />
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3.5">
                         <ConfidenceBadge level={row.confidence} score={0} />
@@ -203,13 +259,11 @@ export default function ActivityLog({ alerts }) {
                           <p className="text-xs text-gray-400 mt-0.5 max-w-[160px] truncate">{row.overrideReason}</p>
                         )}
                       </td>
-                      <td className="px-4 py-3.5 text-gray-600 text-xs max-w-[160px]">
+                      <td className={`px-4 py-3.5 text-xs max-w-[160px] ${isIncident ? 'text-confidence-low font-semibold' : 'text-gray-600'}`}>
                         <p className="truncate">{row.outcome}</p>
                       </td>
                       <td className="px-4 py-3.5">
-                        {row.alertId && (
-                          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-dell-blue transition-colors" />
-                        )}
+                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-dell-blue transition-colors" />
                       </td>
                     </tr>
                   )
@@ -219,6 +273,17 @@ export default function ActivityLog({ alerts }) {
           </div>
         </div>
       )}
+
+      {/* Reasoning Modal — shown for any row click */}
+      {selectedLog && (
+        <LogReasoningModal log={selectedLog} onClose={handleModalClose} />
+      )}
+
+      {/* Incident Card Modal — shown for isIncident rows */}
+      {showIncident && (
+        <IncidentCardModal log={showIncident} onClose={() => setShowIncident(null)} />
+      )}
     </div>
   )
 }
+

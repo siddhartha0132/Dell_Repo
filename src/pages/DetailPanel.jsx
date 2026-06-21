@@ -1,8 +1,9 @@
 // DetailPanel.jsx — Screen 2: Transparency Centrepiece (25% of score lives here)
 // ALL 5 transparency elements present in order, top to bottom.
-import { useState, useEffect } from 'react'
+// Includes Feature: Interactive Confidence Recalculation Simulator ("Context Tuner")
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Shield } from 'lucide-react'
+import { ArrowLeft, Shield, SlidersHorizontal, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
 import ConfidenceBadge from '../components/ConfidenceBadge'
 import ReasoningPanel from '../components/ReasoningPanel'
 import DataSourceBox from '../components/DataSourceBox'
@@ -11,21 +12,87 @@ import ActionButtons from '../components/ActionButtons'
 import OverrideModal from '../components/OverrideModal'
 import AlternativesModal from '../components/AlternativesModal'
 
+// Context Tuner toggle definitions — each adjusts confidence by ±10%
+const CONTEXT_TOGGLES = [
+  {
+    key: 'verifyVPN',
+    label: 'Verify VPN Geolocation',
+    description: 'Cross-reference VPN exit node with user\u2019s registered work location to validate geographic anomaly alerts.',
+    icon: '🌐',
+    delta: +10,
+  },
+  {
+    key: 'excludeDevTools',
+    label: 'Exclude Dev Tools',
+    description: 'Suppress false positives from known developer tools (VS Code extensions, Docker, custom CLIs).',
+    icon: '🛠️',
+    delta: +10,
+  },
+  {
+    key: 'includeHistorical',
+    label: 'Include Historical Patterns',
+    description: 'Weight the score using 90-day behavioral baseline for this device and user.',
+    icon: '📊',
+    delta: +10,
+  },
+  {
+    key: 'strictCompliance',
+    label: 'Strict Compliance Mode',
+    description: 'Apply SOC2/ISO 27001 compliance thresholds — raises sensitivity, may lower confidence.',
+    icon: '🔒',
+    delta: -10,
+  },
+]
+
 export default function DetailPanel({ alerts, setAlerts, showToast }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const alert = alerts.find(a => a.id === id)
-  const [barWidth, setBarWidth] = useState(0)
   const [showOverride, setShowOverride] = useState(false)
   const [showAlt, setShowAlt] = useState(false)
   const [showAskWhy, setShowAskWhy] = useState(false)
   const [isExecuting, setIsExecuting] = useState(false)
 
-  // Animate confidence bar on mount
+  // ── Context Tuner State ──
+  const [tunerOpen, setTunerOpen] = useState(false)
+  const [toggles, setToggles] = useState(() =>
+    Object.fromEntries(CONTEXT_TOGGLES.map(t => [t.key, false]))
+  )
+
+  // Calculate adjusted score from toggles
+  const adjustedScore = useMemo(() => {
+    if (!alert) return 0
+    let score = alert.confidenceScore
+    CONTEXT_TOGGLES.forEach(t => {
+      if (toggles[t.key]) score += t.delta
+    })
+    return Math.max(0, Math.min(100, score))
+  }, [alert, toggles])
+
+  // Derive confidence level from adjusted score
+  const adjustedLevel = useMemo(() => {
+    if (adjustedScore >= 75) return 'HIGH'
+    if (adjustedScore >= 45) return 'MEDIUM'
+    return 'LOW'
+  }, [adjustedScore])
+
+  const isTuned = Object.values(toggles).some(v => v)
+  const tuneDelta = adjustedScore - (alert?.confidenceScore || 0)
+
+  const handleToggle = useCallback((key) => {
+    setToggles(prev => ({ ...prev, [key]: !prev[key] }))
+  }, [])
+
+  const handleResetTuner = useCallback(() => {
+    setToggles(Object.fromEntries(CONTEXT_TOGGLES.map(t => [t.key, false])))
+  }, [])
+
+  // Animate confidence bar on mount and when adjusted score changes
+  const [barWidth, setBarWidth] = useState(0)
   useEffect(() => {
-    const t = setTimeout(() => setBarWidth(alert?.confidenceScore || 0), 200)
+    const t = setTimeout(() => setBarWidth(adjustedScore), 200)
     return () => clearTimeout(t)
-  }, [alert])
+  }, [adjustedScore])
 
   if (!alert) {
     return (
@@ -43,7 +110,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
     MEDIUM: { bar: 'bg-confidence-medium', text: 'text-confidence-medium', bg: 'bg-confidence-medium-bg' },
     LOW: { bar: 'bg-confidence-low', text: 'text-confidence-low', bg: 'bg-confidence-low-bg' },
   }
-  const cc = confColors[alert.confidenceLevel]
+  const cc = confColors[adjustedLevel]
 
   const handleApprove = () => {
     setIsExecuting(true)
@@ -117,9 +184,16 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
 
       {/* ─── 2. CONFIDENCE SECTION (Transparency Element #2) ─── */}
       <div className="card">
-        <p className="label mb-4">AI Confidence Assessment</p>
+        <div className="flex items-center justify-between mb-4">
+          <p className="label">AI Confidence Assessment</p>
+          {isTuned && (
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${tuneDelta > 0 ? 'bg-confidence-high-bg text-confidence-high' : tuneDelta < 0 ? 'bg-confidence-low-bg text-confidence-low' : 'bg-gray-100 text-gray-500'}`}>
+              {tuneDelta > 0 ? '▲' : tuneDelta < 0 ? '▼' : '–'} {Math.abs(tuneDelta)}% from Context Tuner
+            </span>
+          )}
+        </div>
         <div className="flex flex-col items-center gap-4 py-4">
-          <ConfidenceBadge level={alert.confidenceLevel} score={alert.confidenceScore} size="lg" />
+          <ConfidenceBadge level={adjustedLevel} score={adjustedScore} size="lg" />
 
           {/* Animated confidence meter */}
           <div className="w-full max-w-md">
@@ -133,13 +207,25 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
               <div className="absolute left-0 top-0 h-full w-1/3 bg-confidence-low/10 border-r border-confidence-low/20" />
               <div className="absolute left-1/3 top-0 h-full w-1/3 bg-confidence-medium/10 border-r border-confidence-medium/20" />
               <div className="absolute left-2/3 top-0 h-full w-1/3 bg-confidence-high/10" />
+              {/* Original score marker (thin line) shown when tuning */}
+              {isTuned && (
+                <div
+                  className="absolute top-0 h-full w-0.5 bg-gray-400 z-10 transition-all duration-500"
+                  style={{ left: `${alert.confidenceScore}%` }}
+                  title={`Original: ${alert.confidenceScore}%`}
+                />
+              )}
               {/* Bar */}
               <div
-                className={`h-full ${cc.bar} rounded-full transition-all duration-1000 ease-out shadow-sm`}
+                className={`h-full ${cc.bar} rounded-full transition-all duration-700 ease-out shadow-sm`}
                 style={{ width: `${barWidth}%` }}
               />
-              {/* Bar position communicates level — no raw number shown (per hackathon rules) */}
             </div>
+            {isTuned && (
+              <p className="text-[11px] text-gray-400 mt-1.5 text-center">
+                Gray marker = original score ({alert.confidenceScore}%) · Colored bar = tuned score ({adjustedScore}%)
+              </p>
+            )}
           </div>
 
           <p className="text-sm text-gray-600 text-center max-w-md">
@@ -147,6 +233,100 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
             {alert.confidenceDriver}
           </p>
         </div>
+      </div>
+
+      {/* ─── CONTEXT TUNER — Interactive Confidence Recalculation Simulator ─── */}
+      <div className="card" id="context-tuner">
+        <button
+          onClick={() => setTunerOpen(!tunerOpen)}
+          className="w-full flex items-center justify-between group"
+          aria-expanded={tunerOpen}
+          aria-controls="context-tuner-body"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-dell-lightblue rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-dell-blue/20 transition-colors">
+              <SlidersHorizontal className="w-4.5 h-4.5 text-dell-blue" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-bold text-dell-navy">Context Tuner</p>
+              <p className="text-xs text-gray-400">Adjust contextual factors to see how they affect confidence</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isTuned && (
+              <span className="text-[11px] font-bold bg-dell-blue text-white px-2 py-0.5 rounded-full">
+                {Object.values(toggles).filter(Boolean).length} active
+              </span>
+            )}
+            {tunerOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+          </div>
+        </button>
+
+        {tunerOpen && (
+          <div id="context-tuner-body" className="mt-4 pt-4 border-t border-gray-100 space-y-3 animate-fade-in">
+            <p className="text-xs text-gray-400 mb-2">
+              Toggle contextual factors below. Each toggle adjusts the AI confidence score by ±10% based on additional signal analysis.
+            </p>
+            {CONTEXT_TOGGLES.map(toggle => (
+              <div
+                key={toggle.key}
+                className={`flex items-center justify-between gap-4 px-4 py-3 rounded-xl border transition-all duration-300 ${
+                  toggles[toggle.key]
+                    ? 'bg-dell-lightblue border-dell-blue/30 shadow-sm'
+                    : 'bg-gray-50 border-gray-100 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-start gap-3 flex-1">
+                  <span className="text-xl mt-0.5 flex-shrink-0">{toggle.icon}</span>
+                  <div>
+                    <p className="text-sm font-semibold text-dell-navy">{toggle.label}</p>
+                    <p className="text-xs text-gray-400 leading-relaxed mt-0.5">{toggle.description}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className={`text-xs font-bold ${
+                    toggle.delta > 0 ? 'text-confidence-high' : 'text-confidence-low'
+                  }`}>
+                    {toggle.delta > 0 ? '+' : ''}{toggle.delta}%
+                  </span>
+                  <button
+                    id={`tuner-toggle-${toggle.key}`}
+                    onClick={() => handleToggle(toggle.key)}
+                    className={`relative w-11 h-6 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-dell-blue/50 ${
+                      toggles[toggle.key] ? 'bg-dell-blue' : 'bg-gray-300'
+                    }`}
+                    role="switch"
+                    aria-checked={toggles[toggle.key]}
+                    aria-label={toggle.label}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                        toggles[toggle.key] ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {isTuned && (
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-xs text-gray-500">
+                  Adjusted: <strong className={cc.text}>{adjustedLevel}</strong> ({adjustedScore}/100)
+                  <span className="text-gray-400 ml-1">← was {alert.confidenceLevel} ({alert.confidenceScore}/100)</span>
+                </p>
+                <button
+                  id="tuner-reset"
+                  onClick={handleResetTuner}
+                  className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-dell-blue transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ─── 3. REASONING SECTION (Transparency Element #1) ─── */}
