@@ -197,12 +197,16 @@ export default function ActivityLog({ alerts }) {
       ) : (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[1000px] text-sm table-fixed">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  {['Timestamp', 'Device', 'AI Action', 'Confidence', 'Human Decision', 'Outcome', ''].map(h => (
-                    <th key={h} className="px-4 py-3 text-left label">{h}</th>
-                  ))}
+                  <th className="px-4 py-3 text-left label w-[16%]">Timestamp</th>
+                  <th className="px-4 py-3 text-left label w-[12%]">Device</th>
+                  <th className="px-4 py-3 text-left label w-[33%]">AI Action</th>
+                  <th className="px-4 py-3 text-left label w-[14%]">Confidence</th>
+                  <th className="px-4 py-3 text-left label w-[12%]">Human Decision</th>
+                  <th className="px-4 py-3 text-left label w-[11%]">Outcome</th>
+                  <th className="px-4 py-3 text-left label w-[2%]"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -236,9 +240,9 @@ export default function ActivityLog({ alerts }) {
                           {row.device}
                         </div>
                       </td>
-                      <td className="px-4 py-3.5 text-gray-700 max-w-xs">
+                      <td className="px-4 py-3.5 text-gray-700">
                         <div className="flex items-start gap-2">
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <p className={`truncate ${isIncident ? 'text-confidence-low font-semibold' : ''}`}>{row.aiAction}</p>
                             <p className="text-xs text-gray-400 mt-0.5">{row.decisionBy}</p>
                           </div>
@@ -256,10 +260,10 @@ export default function ActivityLog({ alerts }) {
                       <td className="px-4 py-3.5">
                         <span className={dec.class}>{dec.label}</span>
                         {row.overrideReason && (
-                          <p className="text-xs text-gray-400 mt-0.5 max-w-[160px] truncate">{row.overrideReason}</p>
+                          <p className="text-xs text-gray-400 mt-0.5 truncate">{row.overrideReason}</p>
                         )}
                       </td>
-                      <td className={`px-4 py-3.5 text-xs max-w-[160px] ${isIncident ? 'text-confidence-low font-semibold' : 'text-gray-600'}`}>
+                      <td className={`px-4 py-3.5 text-xs ${isIncident ? 'text-confidence-low font-semibold' : 'text-gray-600'}`}>
                         <p className="truncate">{row.outcome}</p>
                       </td>
                       <td className="px-4 py-3.5">
