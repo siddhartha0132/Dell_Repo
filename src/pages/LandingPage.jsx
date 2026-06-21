@@ -26,7 +26,16 @@ export default function LandingPage() {
     e.preventDefault()
     const element = document.getElementById(id)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      const offset = id === 'transparency' ? 80 : 72
+      const bodyRect = document.body.getBoundingClientRect().top
+      const elementRect = element.getBoundingClientRect().top
+      const elementPosition = elementRect - bodyRect
+      const offsetPosition = elementPosition - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
       window.history.pushState(null, '', `#${id}`)
     }
   }
@@ -160,7 +169,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── PROBLEM STATEMENT ─── */}
-      <section id="problem" className="scroll-mt-14 bg-gray-50 border-b border-gray-200">
+      <section id="problem" className="scroll-mt-16 bg-gray-50 border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="label text-dell-blue mb-3">The Problem</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-dell-navy leading-tight max-w-2xl">
@@ -190,7 +199,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── OUR SOLUTION: GuardianAI ─── */}
-      <section id="solution" className="scroll-mt-14 bg-white">
+      <section id="solution" className="scroll-mt-16 bg-white">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="label text-dell-blue mb-3">Our Solution</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-dell-navy leading-tight max-w-3xl">
@@ -222,7 +231,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── ALL SCREENS ─── */}
-      <section id="screens" className="scroll-mt-14 bg-gray-50 border-t border-gray-200">
+      <section id="screens" className="scroll-mt-16 bg-gray-50 border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="label text-dell-blue mb-3">Explore the Prototype</p>
           <h2 className="text-3xl font-extrabold text-dell-navy mb-8">All Screens</h2>
