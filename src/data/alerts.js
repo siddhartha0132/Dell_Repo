@@ -26,6 +26,7 @@ export const alerts = [
     timestamp: '2026-03-15T08:32:00Z',
     severity: 'CRITICAL',
     estimatedImpact: 'High — CVE-2026-21307 actively exploited in the wild',
+    counterfactual: 'If this device had received the patch 7 days ago instead of 14, confidence would drop to MEDIUM.',
   },
   {
     id: 'ALT002',
@@ -50,6 +51,7 @@ export const alerts = [
     timestamp: '2026-03-15T07:58:00Z',
     severity: 'CRITICAL',
     estimatedImpact: 'High — potential account compromise',
+    counterfactual: 'If the user had submitted a travel request for India via HR systems, confidence would drop to LOW.',
   },
   {
     id: 'ALT003',
@@ -78,6 +80,7 @@ export const alerts = [
     decisionBy: 'Alex Chen',
     decisionTime: '2026-03-14T16:35:00Z',
     outcome: 'Replacement ordered — arrival in 2 business days',
+    counterfactual: 'If the S.M.A.R.T. SSD Life Left attribute remained above 15%, this alert would not have triggered.',
   },
   {
     id: 'ALT004',
@@ -102,6 +105,7 @@ export const alerts = [
     timestamp: '2026-03-15T09:10:00Z',
     severity: 'MEDIUM',
     estimatedImpact: 'Medium — compliance risk and potential audit exposure',
+    counterfactual: 'If the license registry had synced within the last 4 hours, confidence would increase to HIGH.',
   },
   {
     id: 'ALT005',
@@ -126,6 +130,7 @@ export const alerts = [
     timestamp: '2026-03-15T06:45:00Z',
     severity: 'MEDIUM',
     estimatedImpact: 'Low — performance degradation, no data loss expected',
+    counterfactual: 'If active user input (mouse/keyboard) was detected in the last 15 minutes, confidence would drop to LOW.',
   },
   {
     id: 'ALT006',
@@ -156,6 +161,7 @@ export const alerts = [
     decisionBy: 'Alex Chen',
     decisionTime: '2026-03-14T10:22:00Z',
     outcome: 'Escalated to Security team for monitoring during migration window',
+    counterfactual: 'If an approved change ticket existed for this device\'s temporary decryption, the alert would have been suppressed.',
   },
   {
     id: 'ALT007',
@@ -180,6 +186,7 @@ export const alerts = [
     timestamp: '2026-03-15T10:22:00Z',
     severity: 'HIGH',
     estimatedImpact: 'Unknown — potential data exfiltration or legitimate activity',
+    counterfactual: 'If the outbound traffic volume was under 500 MB, confidence would drop below the alert threshold.',
   },
   {
     id: 'ALT008',
@@ -204,6 +211,7 @@ export const alerts = [
     timestamp: '2026-03-15T11:30:00Z',
     severity: 'MEDIUM',
     estimatedImpact: 'Low risk — standard security hardening',
+    counterfactual: 'If this were a standard fleet device rather than an Executive profile, confidence would increase to HIGH.',
   },
   {
     id: 'ALT009',
@@ -232,6 +240,7 @@ export const alerts = [
     decisionBy: 'Alex Chen',
     decisionTime: '2026-03-15T07:28:00Z',
     outcome: 'Disk cleanup completed — 31 GB freed. OneDrive sync resumed.',
+    counterfactual: 'If the user\'s OneDrive was completely synced and empty, the recoverable space calculation would drop confidence to LOW.',
   },
   {
     id: 'ALT010',
@@ -256,6 +265,7 @@ export const alerts = [
     timestamp: '2026-03-15T08:55:00Z',
     severity: 'MEDIUM',
     estimatedImpact: 'Medium — productivity loss for engineering user',
+    counterfactual: 'If CPU temperatures remained below 85°C during the crashes, the Windows Update conflict confidence would rise to HIGH.',
   },
 ];
 

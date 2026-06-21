@@ -11,6 +11,7 @@ import LimitationsBox from '../components/LimitationsBox'
 import ActionButtons from '../components/ActionButtons'
 import OverrideModal from '../components/OverrideModal'
 import AlternativesModal from '../components/AlternativesModal'
+import { activityLog } from '../data/alerts'
 
 // Context Tuner toggle definitions — each adjusts confidence by ±10%
 const CONTEXT_TOGGLES = [
@@ -75,6 +76,17 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
     if (adjustedScore >= 45) return 'MEDIUM'
     return 'LOW'
   }, [adjustedScore])
+
+  // Trust Ledger Stats (Option B)
+  const trustStats = useMemo(() => {
+    if (!alert) return null;
+    const relatedLogs = activityLog.filter(log => log.category === alert.category);
+    const total = relatedLogs.length;
+    const approved = relatedLogs.filter(log => log.humanDecision === 'APPROVED' || log.humanDecision === 'AUTO-APPROVED').length;
+    const overridden = relatedLogs.filter(log => log.humanDecision === 'OVERRIDDEN').length;
+    const escalated = relatedLogs.filter(log => log.humanDecision === 'ESCALATED').length;
+    return { total, approved, overridden, escalated };
+  }, [alert]);
 
   const isTuned = Object.values(toggles).some(v => v)
   const tuneDelta = adjustedScore - (alert ? (alert.originalConfidenceScore || alert.confidenceScore) : 0)
@@ -274,8 +286,35 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
             <span className="font-semibold">What drove this score: </span>
             {alert.confidenceDriver}
           </p>
+
+          {/* Option A: Counterfactual Reasoning */}
+          {alert.counterfactual && (
+            <div className="mt-2 w-full max-w-md bg-amber-50 border border-amber-100 rounded-lg p-3">
+              <p className="text-xs font-semibold text-amber-800 mb-1">What would change this:</p>
+              <p className="text-xs text-amber-700">{alert.counterfactual}</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Option B: Trust Ledger */}
+      {trustStats && trustStats.total > 0 && (
+        <div className="card bg-slate-50 border-slate-200">
+          <div className="flex items-center gap-2 mb-2">
+            <Shield className="w-4 h-4 text-slate-500" />
+            <p className="label text-slate-600">Trust Ledger: {alert.category} Alerts</p>
+          </div>
+          <p className="text-sm text-slate-700">
+            GuardianAI has made <strong>{trustStats.total}</strong> recommendations of this type. 
+            <strong> {trustStats.approved}</strong> were approved, 
+            <strong> {trustStats.overridden}</strong> overridden, and 
+            <strong> {trustStats.escalated}</strong> escalated.
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            Historical accuracy validated by your team's decisions, not just this model run.
+          </p>
+        </div>
+      )}
 
       {/* ─── CONTEXT TUNER — Interactive Confidence Recalculation Simulator ─── */}
       <div className="card" id="context-tuner">
