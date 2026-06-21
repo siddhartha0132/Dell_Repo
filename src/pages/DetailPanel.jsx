@@ -127,13 +127,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
                 className={`h-full ${cc.bar} rounded-full transition-all duration-1000 ease-out shadow-sm`}
                 style={{ width: `${barWidth}%` }}
               />
-              {/* Score label */}
-              <span
-                className="absolute top-0 h-full flex items-center text-[10px] font-bold text-white px-1 transition-all duration-1000"
-                style={{ left: `${Math.max(barWidth - 8, 0)}%` }}
-              >
-                {barWidth}
-              </span>
+              {/* Bar position communicates level — no raw number shown (per hackathon rules) */}
             </div>
           </div>
 

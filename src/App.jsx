@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import DetailPanel from './pages/DetailPanel'
 import ActivityLog from './pages/ActivityLog'
 import Settings from './pages/Settings'
+import StakeholderSummary from './pages/StakeholderSummary'
 import { alerts as initialAlerts } from './data/alerts'
 
 export default function App() {
@@ -41,6 +42,10 @@ export default function App() {
           <Route
             path="/settings"
             element={<Settings autonomyMode={autonomyMode} setAutonomyMode={setAutonomyMode} showToast={showToast} />}
+          />
+          <Route
+            path="/summary"
+            element={<StakeholderSummary alerts={alerts} />}
           />
         </Routes>
       </main>

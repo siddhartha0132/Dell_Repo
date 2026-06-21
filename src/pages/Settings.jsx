@@ -136,7 +136,7 @@ export default function Settings({ autonomyMode, setAutonomyMode, showToast }) {
 
       {/* Confirmation modal */}
       {showConfirm && pending && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true" aria-label="Confirm autonomy mode change">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-slide-in">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-base font-bold text-dell-navy">Change Autonomy Mode?</h2>
