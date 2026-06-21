@@ -245,7 +245,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-dell-lightblue rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-dell-blue/20 transition-colors">
-              <SlidersHorizontal className="w-4.5 h-4.5 text-dell-blue" />
+              <SlidersHorizontal className="w-5 h-5 text-dell-blue" />
             </div>
             <div className="text-left">
               <p className="text-sm font-bold text-dell-navy">Context Tuner</p>

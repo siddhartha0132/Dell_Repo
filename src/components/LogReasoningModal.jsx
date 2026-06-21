@@ -16,7 +16,7 @@ export default function LogReasoningModal({ log, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-label="Log entry reasoning details"
-      onClick={onClose}
+      onClick={() => onClose()}
     >
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-slide-in"
@@ -141,7 +141,7 @@ export default function LogReasoningModal({ log, onClose }) {
               View Full Alert Detail →
             </a>
           )}
-          <button onClick={onClose} className={`btn-outline ${log.alertId ? '' : 'flex-1'}`}>
+          <button onClick={() => onClose()} className={`btn-outline ${log.alertId ? '' : 'flex-1'}`}>
             Close
           </button>
         </div>
