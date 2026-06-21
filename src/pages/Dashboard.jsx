@@ -1,7 +1,7 @@
 // Dashboard.jsx — Screen 1: Main Dashboard
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, CheckCircle, Monitor, ChevronRight, Clock } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Monitor, ChevronRight, Clock, Search, Zap } from 'lucide-react'
 import ConfidenceBadge from '../components/ConfidenceBadge'
 import OverrideModal from '../components/OverrideModal'
 import Toast from '../components/Toast'
@@ -27,16 +27,88 @@ const categoryColors = {
   Performance: 'bg-blue-100 text-blue-700',
 }
 
-export default function Dashboard({ alerts, setAlerts, showToast }) {
+export default function Dashboard({ alerts, setAlerts, showToast, autonomyMode }) {
   const navigate = useNavigate()
   const [overrideTarget, setOverrideTarget] = useState(null)
   const [executingId, setExecutingId] = useState(null)
+
+  // Search & Filter States
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeCategory, setActiveCategory] = useState('ALL')
+  const [activeSeverity, setActiveSeverity] = useState('ALL')
+  const [isSimulating, setIsSimulating] = useState(false)
+
   const sorted = sortAlerts(alerts)
+
+  const filteredAlerts = useMemo(() => {
+    return sorted.filter(alert => {
+      const q = searchQuery.toLowerCase()
+      const matchSearch = !q || alert.deviceName.toLowerCase().includes(q) || alert.alertType.toLowerCase().includes(q) || alert.id.toLowerCase().includes(q)
+      const matchCategory = activeCategory === 'ALL' || alert.category === activeCategory
+      const matchSeverity = activeSeverity === 'ALL' || alert.severity === activeSeverity
+      return matchSearch && matchCategory && matchSeverity
+    })
+  }, [sorted, searchQuery, activeCategory, activeSeverity])
 
   const stats = {
     active: alerts.filter(a => a.status === 'PENDING').length,
     pending: alerts.filter(a => a.status === 'PENDING').length,
     total: 2400,
+  }
+
+  const handleAutonomySimulation = () => {
+    // Find qualifying pending alerts
+    const qualifying = alerts.filter(a => {
+      if (a.status !== 'PENDING') return false
+      if (autonomyMode === 'act-low-risk') {
+        // Low-risk = performance category (disk cleanups / RAM leaks)
+        return a.category === 'Performance'
+      }
+      if (autonomyMode === 'act-notify') {
+        // Act and Notify = all high confidence alerts
+        return a.confidenceLevel === 'HIGH'
+      }
+      return false
+    })
+
+    if (qualifying.length === 0) {
+      if (autonomyMode === 'always-ask') {
+        showToast('🙋 Always Ask Me mode: Autonomy is disabled. All actions require manual approval.', 'info')
+      } else if (autonomyMode === 'recommend-wait') {
+        showToast('📋 Recommend & Wait mode: Recommendations are queued for morning digest. No automated actions triggered.', 'info')
+      } else {
+        showToast('ℹ️ No pending recommendations qualify for automated execution under current settings.', 'info')
+      }
+      return
+    }
+
+    setIsSimulating(true)
+    showToast(`🤖 Autonomy Simulation triggered. Executing ${qualifying.length} recommendation(s) autonomously...`, 'info')
+
+    let p = Promise.resolve()
+    qualifying.forEach((alert) => {
+      p = p.then(() => {
+        return new Promise(resolve => {
+          setExecutingId(alert.id)
+          setTimeout(() => {
+            setAlerts(prev => prev.map(a => a.id === alert.id ? {
+              ...a,
+              status: 'APPROVED',
+              decisionBy: 'GuardianAI (Autonomy Mode)',
+              decisionTime: new Date().toISOString(),
+              outcome: a.category === 'Performance' ? 'Success — disk space recovered / service restarted (AUTO)' : 'Success — critical patch applied autonomously (AUTO)'
+            } : a))
+            showToast(`⚡ Autonomously resolved and logged: ${alert.alertType} on ${alert.deviceName}`, 'success')
+            setExecutingId(null)
+            resolve()
+          }, 1500)
+        })
+      })
+    })
+
+    p.then(() => {
+      setIsSimulating(false)
+    })
   }
 
   const handleApprove = (id) => {
@@ -93,11 +165,74 @@ export default function Dashboard({ alerts, setAlerts, showToast }) {
           </div>
         </div>
 
+        {/* Search & Filters */}
+        <div className="card">
+          <div className="flex flex-wrap gap-4 items-center justify-between">
+            <div className="flex flex-wrap gap-3 items-center flex-1 min-w-0">
+              {/* Search */}
+              <div className="relative flex-1 max-w-md min-w-48">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  id="dashboard-search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search device, alert, or ID…"
+                  className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-dell-blue focus:border-transparent"
+                />
+              </div>
+
+              {/* Severity Filter */}
+              <select
+                id="filter-severity"
+                value={activeSeverity}
+                onChange={e => setActiveSeverity(e.target.value)}
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-dell-blue"
+              >
+                <option value="ALL">All Severities</option>
+                <option value="CRITICAL">Critical</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+              </select>
+            </div>
+
+            {/* Simulation trigger */}
+            <button
+              onClick={handleAutonomySimulation}
+              disabled={isSimulating || stats.pending === 0}
+              className={`btn-outline flex items-center gap-1.5 py-2 text-xs font-semibold ${isSimulating ? 'opacity-50 cursor-wait' : ''}`}
+            >
+              <Zap className={`w-3.5 h-3.5 ${isSimulating ? 'animate-bounce text-amber-500' : 'text-dell-blue'}`} />
+              {isSimulating ? 'Simulating Autonomy...' : 'Simulate Autonomy Run'}
+            </button>
+          </div>
+
+          {/* Category Filter Chips */}
+          <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-gray-100">
+            {['ALL', 'Security', 'Hardware', 'Compliance', 'Performance'].map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all duration-150 ${
+                  activeCategory === cat
+                    ? 'bg-dell-blue text-white border-dell-blue shadow-sm'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {cat === 'ALL' ? 'All Categories' : cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Recommendation cards */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-dell-navy">AI Recommendations</h2>
-            <span className="text-xs text-gray-400">Sorted by priority — critical first</span>
+            {filteredAlerts.length !== sorted.length && (
+              <span className="text-xs text-gray-400">Showing {filteredAlerts.length} of {sorted.length} alerts</span>
+            )}
           </div>
           <div className="space-y-3">
             {stats.pending === 0 && (
@@ -111,7 +246,19 @@ export default function Dashboard({ alerts, setAlerts, showToast }) {
                 </p>
               </div>
             )}
-            {sorted.map(alert => (
+            {stats.pending > 0 && filteredAlerts.length === 0 && (
+              <div className="card py-12 text-center text-gray-500 bg-gray-50/50">
+                <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <p className="text-sm font-semibold">No recommendations match your search filters.</p>
+                <button
+                  onClick={() => { setSearchQuery(''); setActiveCategory('ALL'); setActiveSeverity('ALL') }}
+                  className="mt-3 text-xs text-dell-blue hover:underline font-semibold"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
+            {filteredAlerts.map(alert => (
               <AlertCard
                 key={alert.id}
                 alert={alert}

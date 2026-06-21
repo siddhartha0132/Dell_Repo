@@ -61,7 +61,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route
             path="/dashboard"
-            element={<Dashboard alerts={alerts} setAlerts={setAlerts} showToast={showToast} />}
+            element={<Dashboard alerts={alerts} setAlerts={setAlerts} showToast={showToast} autonomyMode={autonomyMode} />}
           />
           <Route
             path="/detail/:id"

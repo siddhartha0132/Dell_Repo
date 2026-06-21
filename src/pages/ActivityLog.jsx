@@ -10,18 +10,20 @@ import IncidentCardModal from '../components/IncidentCardModal'
 import { activityLog as baseLog } from '../data/alerts'
 
 function exportCSV(rows) {
-  const headers = ['Timestamp', 'Device', 'Alert ID', 'AI Action', 'Confidence', 'Human Decision', 'Decision By', 'Outcome']
+  const headers = ['Timestamp', 'Device', 'Alert ID', 'AI Action', 'Confidence', 'Human Decision', 'Decision By', 'Outcome', 'Override Reason', 'Override Notes']
   const lines = [
     headers.join(','),
     ...rows.map(r => [
       new Date(r.timestamp).toLocaleString(),
       r.device,
       r.alertId || '—',
-      `"${r.aiAction}"`,
+      `"${(r.aiAction || '').replace(/"/g, '""')}"`,
       r.confidence,
       r.humanDecision,
       r.decisionBy,
-      `"${r.outcome}"`,
+      `"${(r.outcome || '').replace(/"/g, '""')}"`,
+      `"${(r.overrideReason || '—').replace(/"/g, '""')}"`,
+      `"${(r.overrideNotes || '—').replace(/"/g, '""')}"`,
     ].join(','))
   ]
   const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
@@ -64,6 +66,7 @@ export default function ActivityLog({ alerts }) {
         confidence: a.confidenceLevel,
         humanDecision: a.status,
         overrideReason: a.overrideReason,
+        overrideNotes: a.overrideNotes,
         decisionBy: a.decisionBy || 'Alex Chen',
         outcome: a.outcome || (a.status === 'APPROVED' ? 'Pending execution' : a.status === 'ESCALATED' ? 'Escalated to Security Team' : 'Overridden by admin'),
         category: a.category,
