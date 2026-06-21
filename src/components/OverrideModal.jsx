@@ -24,7 +24,7 @@ export default function OverrideModal({ alert, onConfirm, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true" aria-label="Override AI recommendation">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-slide-in">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -32,7 +32,7 @@ export default function OverrideModal({ alert, onConfirm, onClose }) {
             <h2 className="text-base font-bold text-dell-navy">Override AI Recommendation</h2>
             <p className="text-xs text-gray-500 mt-0.5">{alert?.deviceName} — {alert?.alertType}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} aria-label="Close override modal" className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>

@@ -1,6 +1,6 @@
 // Navbar.jsx — Top navigation with Autonomy Mode badge
 import { Link, useLocation } from 'react-router-dom'
-import { Bell, User, Shield, Activity, Settings, LayoutDashboard } from 'lucide-react'
+import { Bell, User, Shield, Activity, Settings, LayoutDashboard, FileText } from 'lucide-react'
 
 export default function Navbar({ autonomyMode, alertCount = 0 }) {
   const loc = useLocation()
@@ -12,9 +12,10 @@ export default function Navbar({ autonomyMode, alertCount = 0 }) {
   }
   const mode = autonomyLabels[autonomyMode] || autonomyLabels['always-ask']
   const navItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/log', label: 'Activity Log', icon: Activity },
     { to: '/settings', label: 'Settings', icon: Settings },
+    { to: '/summary', label: 'Summary', icon: FileText },
   ]
 
   return (

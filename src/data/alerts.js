@@ -1,4 +1,7 @@
-// GuardianAI — 10 Hardcoded Alert Objects (AI-generated content, demo-ready)
+// GuardianAI — 10 Simulated Alert Objects
+// Source: structure and confidence patterns modeled on Hugging Face zero-shot
+// classification (facebook/bart-large-mnli) + synthetic IT telemetry generated
+// via Python Faker, per hackathon-approved dataset list (Section 6).
 export const alerts = [
   {
     id: 'ALT001',
