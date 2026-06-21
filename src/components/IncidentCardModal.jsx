@@ -1,8 +1,26 @@
 // IncidentCardModal.jsx — AI Incident Post-Mortem Card
 // Structured failure analysis when AI causes an unintended outcome.
+import { useEffect } from 'react'
 import { X, AlertOctagon, Search, ShieldCheck, Lightbulb, Clock, Users, HardDrive } from 'lucide-react'
 
 export default function IncidentCardModal({ log, onClose }) {
+  // Body scroll lock
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Escape key close listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   if (!log || !log.incident) return null
 
   const inc = log.incident

@@ -1,5 +1,5 @@
 // OverrideModal.jsx — Screen 4: Override Flow
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 
 const OVERRIDE_REASONS = [
@@ -11,6 +11,22 @@ const OVERRIDE_REASONS = [
 ]
 
 export default function OverrideModal({ alert, onConfirm, onClose }) {
+  // Body scroll lock
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Escape key close listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
   const [reason, setReason] = useState('')
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)

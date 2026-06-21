@@ -39,7 +39,7 @@ export default function ConfidenceBadge({ level, score, size = 'sm', pulse = fal
             style={{ width: `${score}%` }}
           />
         </div>
-        <span className="text-sm opacity-70 font-semibold">Score: {score}/100 — {c.label}</span>
+        <span className="text-sm opacity-70 font-semibold">{c.label}</span>
       </div>
     )
   }

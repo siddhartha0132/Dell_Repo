@@ -368,6 +368,37 @@ export const activityLog = [
       dataLoss: false,
     },
   },
+  {
+    id: 'LOG007',
+    timestamp: '2024-03-11T11:20:00Z',
+    device: 'DELL-SRV-0102',
+    alertId: null,
+    aiAction: 'Auto-cleaned IIS Temp Logs Directory (AUTO)',
+    confidence: 'HIGH',
+    humanDecision: 'AUTO-APPROVED',
+    decisionBy: 'GuardianAI (Act on Low-Risk mode)',
+    outcome: 'FAILED — Production Site Offline (503 Service Unavailable)',
+    category: 'Performance',
+    isIncident: true,
+    reasoningSteps: [
+      '💿 C: drive on production server was at 98% capacity — disk exhaustion imminent',
+      '🗑️ IIS Log folder identified as primary storage consumer (82 GB of log files)',
+      '✅ Pre-cleanup check verified logs older than 14 days were compressed and archived',
+      '⚠️ Post-cleanup: IIS service failed to restart due to active lockfile deletion in temp folder',
+    ],
+    dataSource: 'Server disk performance telemetry + IIS active site configuration database',
+    limitations: 'Automatic directory cleanup scripts rely on timestamps and do not check for active file locks held by IIS worker processes (w3wp.exe) if the process is unresponsive.',
+    incident: {
+      severity: 'CRITICAL',
+      rootCause: 'The automated cleanup script deleted an active lock file in the IIS temp directory because the worker process was temporarily hung and did not register the lock in the OS file table.',
+      telemetryGap: 'Disk utilization agent does not monitor active IIS process handles or verify web server response codes (HTTP 200) post-cleanup.',
+      impactMitigation: 'Web administrator restarted IIS services and manually recreated the system lock files. Service restored within 12 minutes.',
+      preventiveAction: 'GuardianAI has updated the disk cleanup protocol to verify that IIS worker processes are stopped or idle before deleting any temp or lock files, and will perform an automated HTTP ping test post-execution to verify service health.',
+      timeToResolve: '12 minutes',
+      affectedUsers: 450,
+      dataLoss: false,
+    },
+  },
 ];
 
 export const autonomyLevels = [

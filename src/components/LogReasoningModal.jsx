@@ -1,9 +1,27 @@
 // LogReasoningModal.jsx — Clickable Activity Log Reasoning Drawer/Modal
 // Shows the full Reasoning Panel, Data Source, and Limitations for ANY log entry.
+import { useEffect } from 'react'
 import { X, Brain, Database, AlertTriangle } from 'lucide-react'
 import ConfidenceBadge from './ConfidenceBadge'
 
 export default function LogReasoningModal({ log, onClose }) {
+  // Body scroll lock
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Escape key close listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   if (!log) return null
 
   const hasReasoning = log.reasoningSteps && log.reasoningSteps.length > 0

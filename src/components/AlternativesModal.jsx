@@ -1,8 +1,26 @@
 // AlternativesModal.jsx — See Alternatives: Comparison Mode (Innovation feature)
+import { useEffect } from 'react'
 import { X } from 'lucide-react'
 import ConfidenceBadge from './ConfidenceBadge'
 
 export default function AlternativesModal({ alert, onClose }) {
+  // Body scroll lock
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Escape key close listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   if (!alert) return null
 
   const alternatives = [
@@ -33,8 +51,17 @@ export default function AlternativesModal({ alert, onClose }) {
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true" aria-label="Alternative AI recommendations">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto animate-slide-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Alternative AI recommendations"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto animate-slide-in"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
           <div>
             <h2 className="text-base font-bold text-dell-navy">⇄ Alternative Recommendations</h2>

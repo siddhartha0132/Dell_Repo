@@ -56,13 +56,13 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
   // ── Context Tuner State ──
   const [tunerOpen, setTunerOpen] = useState(false)
   const [toggles, setToggles] = useState(() =>
-    Object.fromEntries(CONTEXT_TOGGLES.map(t => [t.key, false]))
+    alert ? (alert.tunerState || Object.fromEntries(CONTEXT_TOGGLES.map(t => [t.key, false]))) : {}
   )
 
   // Calculate adjusted score from toggles
   const adjustedScore = useMemo(() => {
     if (!alert) return 0
-    let score = alert.confidenceScore
+    let score = alert.originalConfidenceScore || alert.confidenceScore
     CONTEXT_TOGGLES.forEach(t => {
       if (toggles[t.key]) score += t.delta
     })
@@ -77,15 +77,57 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
   }, [adjustedScore])
 
   const isTuned = Object.values(toggles).some(v => v)
-  const tuneDelta = adjustedScore - (alert?.confidenceScore || 0)
+  const tuneDelta = adjustedScore - (alert ? (alert.originalConfidenceScore || alert.confidenceScore) : 0)
 
   const handleToggle = useCallback((key) => {
-    setToggles(prev => ({ ...prev, [key]: !prev[key] }))
-  }, [])
+    setToggles(prev => {
+      const next = { ...prev, [key]: !prev[key] }
+      // Sync immediately with parent alerts state
+      setAlerts(all => all.map(a => {
+        if (a.id === id) {
+          const originalConfidenceScore = a.originalConfidenceScore || a.confidenceScore
+          const originalConfidenceLevel = a.originalConfidenceLevel || a.confidenceLevel
+          
+          let score = originalConfidenceScore
+          CONTEXT_TOGGLES.forEach(t => {
+            if (next[t.key]) score += t.delta
+          })
+          score = Math.max(0, Math.min(100, score))
+          
+          let level = 'MEDIUM'
+          if (score >= 75) level = 'HIGH'
+          else if (score < 45) level = 'LOW'
+
+          return {
+            ...a,
+            originalConfidenceScore,
+            originalConfidenceLevel,
+            confidenceScore: score,
+            confidenceLevel: level,
+            tunerState: next,
+          }
+        }
+        return a
+      }))
+      return next
+    })
+  }, [id, setAlerts])
 
   const handleResetTuner = useCallback(() => {
-    setToggles(Object.fromEntries(CONTEXT_TOGGLES.map(t => [t.key, false])))
-  }, [])
+    const next = Object.fromEntries(CONTEXT_TOGGLES.map(t => [t.key, false]))
+    setToggles(next)
+    setAlerts(all => all.map(a => {
+      if (a.id === id) {
+        return {
+          ...a,
+          confidenceScore: a.originalConfidenceScore || a.confidenceScore,
+          confidenceLevel: a.originalConfidenceLevel || a.confidenceLevel,
+          tunerState: next,
+        }
+      }
+      return a
+    }))
+  }, [id, setAlerts])
 
   // Animate confidence bar on mount and when adjusted score changes
   const [barWidth, setBarWidth] = useState(0)
@@ -188,7 +230,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
           <p className="label">AI Confidence Assessment</p>
           {isTuned && (
             <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${tuneDelta > 0 ? 'bg-confidence-high-bg text-confidence-high' : tuneDelta < 0 ? 'bg-confidence-low-bg text-confidence-low' : 'bg-gray-100 text-gray-500'}`}>
-              {tuneDelta > 0 ? '▲' : tuneDelta < 0 ? '▼' : '–'} {Math.abs(tuneDelta)}% from Context Tuner
+              {tuneDelta > 0 ? '▲' : tuneDelta < 0 ? '▼' : ''} {tuneDelta !== 0 ? `${tuneDelta > 0 ? '+' : ''}${tuneDelta} points` : 'No adjustment'} from Context Tuner
             </span>
           )}
         </div>
@@ -211,8 +253,8 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
               {isTuned && (
                 <div
                   className="absolute top-0 h-full w-0.5 bg-gray-400 z-10 transition-all duration-500"
-                  style={{ left: `${alert.confidenceScore}%` }}
-                  title={`Original: ${alert.confidenceScore}%`}
+                  style={{ left: `${alert.originalConfidenceScore || alert.confidenceScore}%` }}
+                  title="Original Confidence Baseline"
                 />
               )}
               {/* Bar */}
@@ -223,7 +265,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
             </div>
             {isTuned && (
               <p className="text-[11px] text-gray-400 mt-1.5 text-center">
-                Gray marker = original score ({alert.confidenceScore}%) · Colored bar = tuned score ({adjustedScore}%)
+                Gray marker = original baseline · Colored bar = current tuned confidence
               </p>
             )}
           </div>
@@ -265,7 +307,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
         {tunerOpen && (
           <div id="context-tuner-body" className="mt-4 pt-4 border-t border-gray-100 space-y-3 animate-fade-in">
             <p className="text-xs text-gray-400 mb-2">
-              Toggle contextual factors below. Each toggle adjusts the AI confidence score by ±10% based on additional signal analysis.
+              Toggle contextual factors below. Each toggle shifts the AI confidence by ±10 points based on additional signal analysis.
             </p>
             {CONTEXT_TOGGLES.map(toggle => (
               <div
@@ -287,7 +329,7 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
                   <span className={`text-xs font-bold ${
                     toggle.delta > 0 ? 'text-confidence-high' : 'text-confidence-low'
                   }`}>
-                    {toggle.delta > 0 ? '+' : ''}{toggle.delta}%
+                    {toggle.delta > 0 ? '+' : ''}{toggle.delta} pts
                   </span>
                   <button
                     id={`tuner-toggle-${toggle.key}`}
@@ -309,22 +351,22 @@ export default function DetailPanel({ alerts, setAlerts, showToast }) {
               </div>
             ))}
 
-            {isTuned && (
-              <div className="flex items-center justify-between pt-2">
-                <p className="text-xs text-gray-500">
-                  Adjusted: <strong className={cc.text}>{adjustedLevel}</strong> ({adjustedScore}/100)
-                  <span className="text-gray-400 ml-1">← was {alert.confidenceLevel} ({alert.confidenceScore}/100)</span>
-                </p>
-                <button
-                  id="tuner-reset"
-                  onClick={handleResetTuner}
-                  className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-dell-blue transition-colors"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  Reset
-                </button>
-              </div>
-            )}
+              {isTuned && (
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-xs text-gray-500">
+                    Adjusted Level: <strong className={cc.text}>{adjustedLevel}</strong>
+                    <span className="text-gray-400 ml-1">← was {alert.originalConfidenceLevel || alert.confidenceLevel}</span>
+                  </p>
+                  <button
+                    id="tuner-reset"
+                    onClick={handleResetTuner}
+                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-dell-blue transition-colors"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Reset
+                  </button>
+                </div>
+              )}
           </div>
         )}
       </div>
