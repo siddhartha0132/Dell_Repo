@@ -22,6 +22,15 @@ const TRANSPARENCY = [
 export default function LandingPage() {
   const navigate = useNavigate()
 
+  const handleScrollTo = (e, id) => {
+    e.preventDefault()
+    const element = document.getElementById(id)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+      window.history.pushState(null, '', `#${id}`)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -44,14 +53,15 @@ export default function LandingPage() {
           {/* Center nav links */}
           <div className="hidden md:flex items-center gap-1">
             {[
-              { label: 'Problem', href: '#problem' },
-              { label: 'Solution', href: '#solution' },
-              { label: 'Transparency', href: '#transparency' },
-              { label: 'Screens', href: '#screens' },
+              { label: 'Problem', id: 'problem' },
+              { label: 'Solution', id: 'solution' },
+              { label: 'Transparency', id: 'transparency' },
+              { label: 'Screens', id: 'screens' },
             ].map(item => (
               <a
                 key={item.label}
-                href={item.href}
+                href={`#${item.id}`}
+                onClick={(e) => handleScrollTo(e, item.id)}
                 className="px-3 py-1.5 text-[13px] text-gray-600 hover:text-dell-blue font-medium rounded-md hover:bg-gray-50 transition-all duration-150"
               >
                 {item.label}
@@ -126,6 +136,7 @@ export default function LandingPage() {
             </button>
             <a
               href="#problem"
+              onClick={(e) => handleScrollTo(e, 'problem')}
               className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white px-6 py-3.5 rounded-xl font-semibold text-base backdrop-blur transition-all duration-200"
             >
               Read Problem Statement
