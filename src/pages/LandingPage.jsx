@@ -151,11 +151,8 @@ const PROBLEMS = [
 
 export default function LandingPage() {
   const navigate = useNavigate()
-  const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    // scroll tracking kept for future use
   }, [])
 
   const scrollTo = (id) => {
@@ -166,43 +163,57 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F0F4F8] text-slate-800" style={{ fontFamily: "'Inter', sans-serif" }}>
 
-      {/* ── FLOATING PILL NAVBAR ── */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 pointer-events-none">
-        <nav className={`pointer-events-auto flex items-center gap-1 px-3 py-2 rounded-full border transition-all duration-300 ${scrolled ? 'bg-white/80 border-slate-200 backdrop-blur-xl shadow-lg text-slate-800' : 'bg-white/40 border-slate-200/60 backdrop-blur-md text-slate-700'}`}>
-          {/* Logo */}
-          <div className="flex items-center gap-2 px-3 mr-2">
-            <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center">
-              <Shield className="w-3.5 h-3.5 text-white" />
+      {/* ── NAVBAR — matches the app navbar exactly ── */}
+      <header className="bg-white border-b border-gray-100 shadow-sm px-6 flex items-center justify-between sticky top-0 z-50 h-14">
+        {/* Logo + nav links */}
+        <div className="flex items-center gap-8 h-full">
+          <div className="flex items-center gap-2.5 font-bold text-lg tracking-tight">
+            <div className="w-8 h-8 bg-gradient-to-br from-dell-blue to-blue-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-200">
+              <Shield className="w-4 h-4 text-white" />
             </div>
-            <span className="text-sm font-bold tracking-tight text-slate-900">Guardian<span className="text-blue-600">AI</span></span>
+            <span className="text-dell-navy">Guardian<span className="text-dell-blue">AI</span></span>
           </div>
 
-          {[['Problem', 'problem'], ['Solution', 'solution'], ['Screens', 'screens']].map(([label, id]) => (
-            <button
-              key={id}
-              onClick={() => scrollTo(id)}
-              className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-950 rounded-full hover:bg-slate-100 transition-all duration-150"
+          <nav className="hidden md:flex items-center gap-1 h-full">
+            {[['Problem', 'problem'], ['Solution', 'solution'], ['Screens', 'screens']].map(([label, id]) => (
+              <button
+                key={id}
+                onClick={() => scrollTo(id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-gray-500 hover:text-dell-navy hover:bg-gray-50 transition-all duration-150"
+              >
+                {label}
+              </button>
+            ))}
+            <a
+              href="https://github.com/siddhartha0132/Dell_Repo"
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-gray-500 hover:text-dell-navy hover:bg-gray-50 transition-all duration-150"
             >
-              {label}
-            </button>
-          ))}
+              GitHub
+            </a>
+          </nav>
+        </div>
 
-          <a
-            href="https://github.com/siddhartha0132/Dell_Repo"
-            target="_blank" rel="noopener noreferrer"
-            className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-950 rounded-full hover:bg-slate-100 transition-all duration-150"
-          >
-            GitHub
-          </a>
-
+        {/* Right side — Launch button + avatar */}
+        <div className="flex items-center gap-3">
           <button
+            id="btn-enter-dashboard"
             onClick={() => navigate('/dashboard')}
-            className="ml-1 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 shadow-lg shadow-blue-600/30"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-dell-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 shadow-md shadow-blue-200"
           >
             Launch App <ArrowRight className="w-3 h-3" />
           </button>
-        </nav>
-      </div>
+          <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
+            <div className="w-8 h-8 bg-gradient-to-br from-dell-blue to-blue-700 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm">
+              AC
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-xs font-semibold text-dell-navy leading-none">Alex Chen</p>
+              <p className="text-[10px] text-gray-400 leading-none mt-0.5">IT Admin</p>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* ── HERO ── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
@@ -215,7 +226,7 @@ export default function LandingPage() {
         {/* Blue glow centre */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-6xl mx-auto px-6 pt-28 pb-20 flex flex-col lg:flex-row items-center gap-16">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-20 flex flex-col lg:flex-row items-center gap-16">
           {/* Left text */}
           <div className="flex-1 text-center lg:text-left">
             {/* Badge */}
