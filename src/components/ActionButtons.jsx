@@ -39,13 +39,13 @@ export default function ActionButtons({ alertId, status, isExecuting, onApprove,
         Override
       </button>
 
-      {/* 3. ASK WHY — Explanation link */}
+      {/* 3. ASK WHY — Explanation button with border */}
       <button
         id={`btn-askwhy-${alertId}`}
         onClick={onAskWhy}
         disabled={isExecuting}
         aria-label="Ask why the AI made this recommendation"
-        className="btn-link flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="btn-outline flex items-center gap-1.5 text-dell-blue border-dell-blue/30 hover:bg-dell-lightblue disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span aria-hidden="true">❓</span>
         Ask Why

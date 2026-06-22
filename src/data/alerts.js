@@ -19,6 +19,20 @@ export const alerts = [
       '💻 OS version 22H2 falls squarely in Microsoft\'s affected range for this vulnerability',
       '✅ No custom software conflicts detected in device telemetry — safe to proceed',
     ],
+    timelineEvents: [
+    {
+      time: "14 days ago",
+      event: "Device exceeded patch window"
+    },
+    {
+      time: "Last week",
+      event: "3 similar devices experienced ransomware exposure"
+    },
+    {
+      time: "Today",
+      event: "GuardianAI generated recommendation"
+    }
+  ],
     dataSource: 'Telemetry from 342 similar fleet devices (Dell OptiPlex 7090, Win 11 22H2) over 14 days',
     limitations: 'Recommendation not validated on this specific hardware revision (Gen 3 BIOS 1.18.0). Patch rollback has not been tested on this exact configuration.',
     recommendedAction: 'Apply patch KB5034441 during next maintenance window (within 24 hrs recommended)',
@@ -44,6 +58,24 @@ export const alerts = [
       '🔑 2 failed password attempts preceded the successful login at this IP',
       '📊 2 similar anomalies in your fleet this week were confirmed credential compromise incidents',
     ],
+    timelineEvents: [
+      {
+        time: "90 days ago",
+        event: "Normal login pattern established (8 AM–7 PM)"
+      },
+      {
+        time: "03:14 AM",
+        event: "Off-hours login detected from Mumbai"
+      },
+      {
+        time: "Moments later",
+        event: "2 failed password attempts recorded"
+      },
+      {
+        time: "Today",
+        event: "GuardianAI recommended account protection"
+      }
+    ],
     dataSource: 'Login telemetry from 89 similar user profiles in the fleet over 90 days',
     limitations: 'VPN exit node IPs are indistinguishable from attacker IPs in this dataset. User may be travelling. No MFA challenge was triggered (MFA not enrolled on this account).',
     recommendedAction: 'Force password reset and temporarily suspend session pending admin verification',
@@ -68,6 +100,24 @@ export const alerts = [
       '📈 Wear rate over last 30 days suggests complete failure within 12–18 days',
       '⚠️ 47 reallocated sectors detected — early sign of physical media degradation',
       '📁 Last backup recorded 9 days ago — data loss risk is elevated if drive fails before next backup',
+    ],
+    timelineEvents: [
+      {
+        time: "30 days ago",
+        event: "SSD wear rate began increasing"
+      },
+      {
+        time: "7 days ago",
+        event: "SMART warnings exceeded safe threshold"
+      },
+      {
+        time: "Today",
+        event: "Failure risk projected within 12–18 days"
+      },
+      {
+        time: "Today",
+        event: "Replacement recommendation generated"
+      }
     ],
     dataSource: 'Direct SMART telemetry from device hardware + failure rate data from 156 similar drives',
     limitations: 'SMART predictions have a ±20% accuracy window. Drive may fail earlier or later than predicted. Backup currency unknown after most recent check.',
@@ -98,6 +148,24 @@ export const alerts = [
       '⏱️ License registry last synced 48 hours ago — a new seat may have been assigned since',
       '📌 3 similar flagged devices this month were confirmed true unlicensed installs',
     ],
+    timelineEvents: [
+      {
+        time: "48 hours ago",
+        event: "License registry last synchronized"
+      },
+      {
+        time: "Today",
+        event: "Photoshop installation detected"
+      },
+      {
+        time: "Today",
+        event: "No available license seat found"
+      },
+      {
+        time: "Today",
+        event: "Verification recommendation generated"
+      }
+    ],
     dataSource: 'Software inventory from 2,400 fleet devices + license registry (48-hr old snapshot)',
     limitations: 'License database sync lag (48 hrs) means this may be a false positive if a license was recently assigned. Adobe volume license metadata is not always reliably reported by this version of the DLMS agent.',
     recommendedAction: 'Verify license assignment in Adobe Admin Console before removing software',
@@ -123,6 +191,24 @@ export const alerts = [
       '🔄 12 similar cases this month resolved by restarting Windows Update service',
       '🖥️ No user activity detected for last 2 hours — low interruption risk for restart',
     ],
+    timelineEvents: [
+      {
+        time: "6 hours ago",
+        event: "RAM usage exceeded 94%"
+      },
+      {
+        time: "4 hours ago",
+        event: "Windows Update service identified as top consumer"
+      },
+      {
+        time: "2 hours ago",
+        event: "No user activity detected"
+      },
+      {
+        time: "Today",
+        event: "Service restart recommended"
+      }
+    ],
     dataSource: 'Performance telemetry from 2,400 devices over 30 days + process analysis from 67 similar incidents',
     limitations: 'Root cause may be a third-party application, not Windows Update. Restarting the service will interrupt any active update downloads. AI cannot confirm whether data loss would occur without process-level inspection.',
     recommendedAction: 'Restart Windows Update service (net stop wuauserv) remotely — low risk during off-hours',
@@ -147,6 +233,24 @@ export const alerts = [
       '📜 Company policy DEL-SEC-007 mandates full-disk encryption on all portable devices',
       '🕵️ Deactivation event logged at 2026-03-13 22:47 — no change ticket exists for this device',
       '⚖️ 2 similar incidents in Q1 2026 resulted in compliance violations and audit findings',
+    ],
+    timelineEvents: [
+      {
+        time: "2 days ago",
+        event: "BitLocker deactivation event logged"
+      },
+      {
+        time: "2 days ago",
+        event: "No approved change ticket found"
+      },
+      {
+        time: "Today",
+        event: "Compliance violation detected"
+      },
+      {
+        time: "Today",
+        event: "Re-enable encryption recommended"
+      }
     ],
     dataSource: 'Direct WMI query to device (real-time) + policy compliance database + change ticket system',
     limitations: 'The AI cannot determine WHY BitLocker was disabled — could be admin action, user action, or failed update. Enabling BitLocker will trigger a full disk encryption pass (2–4 hrs on this device size).',
@@ -179,6 +283,24 @@ export const alerts = [
       '🤔 However, this device runs a legitimate anonymisation tool for legal research (documented)',
       '📉 Confidence is limited because the AI cannot inspect encrypted packet contents',
     ],
+    timelineEvents: [
+      {
+        time: "4 hours ago",
+        event: "2.3 GB outbound traffic detected"
+      },
+      {
+        time: "3 hours ago",
+        event: "Destination resolved to Tor exit node"
+      },
+      {
+        time: "2 hours ago",
+        event: "Legitimate anonymisation tool identified"
+      },
+      {
+        time: "Today",
+        event: "Human analyst review recommended"
+      }
+    ],
     dataSource: 'Network flow telemetry from firewall logs over 24 hours + threat intelligence feed (updated 6 hrs ago)',
     limitations: 'AI cannot inspect encrypted traffic payloads — traffic destination is suspicious but not confirmed malicious. Tor exit nodes serve both legitimate and malicious traffic. Blocking may disrupt legitimate legal research workflows.',
     recommendedAction: 'Flag for Security Analyst review before taking automated action — do not block without investigation',
@@ -204,6 +326,24 @@ export const alerts = [
       '⚡ 127 standard fleet devices successfully updated to 1.19.0 with no issues reported',
       '📋 Update requires a full system reboot — scheduling during business hours is not recommended',
     ],
+    timelineEvents: [
+      {
+        time: "Recent advisory",
+        event: "Dell released BIOS 1.19.0"
+      },
+      {
+        time: "This month",
+        event: "127 standard devices updated successfully"
+      },
+      {
+        time: "Today",
+        event: "Executive device assessed"
+      },
+      {
+        time: "Today",
+        event: "Maintenance window update recommended"
+      }
+    ],
     dataSource: 'Firmware telemetry from 127 updated devices + Dell SupportAssist advisory database',
     limitations: 'Executive-class device BIOS configurations are not represented in the 127-device test sample. Custom TPM configuration may behave differently post-update. No rollback path exists for BIOS updates.',
     recommendedAction: 'Schedule BIOS update during next maintenance window; verify executive BIOS settings pre/post update',
@@ -228,6 +368,24 @@ export const alerts = [
       '📈 Growth rate of 1.2 GB/day means full capacity will be reached in ~2 days',
       '🗑️ Disk Cleanup analysis shows 34 GB of recoverable space (temp files, old Windows Update cache)',
       '☁️ User\'s OneDrive sync has been paused for 11 days — 18 GB of files pending upload',
+    ],
+    timelineEvents: [
+      {
+        time: "30 days ago",
+        event: "Disk growth trend detected"
+      },
+      {
+        time: "Today",
+        event: "Drive reached 96% capacity"
+      },
+      {
+        time: "Today",
+        event: "34 GB recoverable space identified"
+      },
+      {
+        time: "Today",
+        event: "Cleanup recommendation generated"
+      }
     ],
     dataSource: 'Direct disk telemetry + file system analysis + OneDrive sync status API over 30 days',
     limitations: 'Disk Cleanup estimate may vary if files are locked by running processes. Deleting temp files will not address the underlying growth trend. OneDrive upload requires network bandwidth that may affect other users.',
@@ -257,6 +415,24 @@ export const alerts = [
       '🔍 Two likely causes: (1) Windows Update KB5031455 known incompatibility with NVIDIA 546.x drivers',
       '🔍 Or (2) thermal throttling from blocked vents causing driver timeout (CPU temp 94°C recorded)',
       '📊 Only 12 similar cases in fleet history — insufficient data to distinguish between causes confidently',
+    ],
+    timelineEvents: [
+      {
+        time: "48 hours ago",
+        event: "First GPU crash detected"
+      },
+      {
+        time: "24 hours ago",
+        event: "Repeated crash loop observed"
+      },
+      {
+        time: "Today",
+        event: "Two possible root causes identified"
+      },
+      {
+        time: "Today",
+        event: "Rollback recommendation generated"
+      }
     ],
     dataSource: 'Event logs from 12 similar GPU crash incidents in fleet over 6 months + Microsoft known-issue database',
     limitations: 'AI cannot determine if the primary cause is the Windows Update conflict or thermal throttling without physical inspection. Rollback of KB5031455 may not resolve the issue if thermal is the root cause. Thermal inspection requires on-site visit.',
